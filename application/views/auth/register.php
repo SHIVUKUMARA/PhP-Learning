@@ -12,17 +12,17 @@ $this->load->view('partials/header');
   <div class="card">
     <div class="card-body register-card-body">
 
-      <!-- Error Message -->
       <?php if($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <?= $this->session->flashdata('error'); ?>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+      <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
+      <?php endif; ?>
+
+      <?php if($this->session->flashdata('success')): ?>
+      <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
       <?php endif; ?>
 
       <p class="register-box-msg">Register a new membership</p>
 
-      <form action="<?= site_url('auth/register_submit'); ?>" method="post">
+      <?= form_open('auth/register_submit'); ?>
         <div class="input-group mb-3">
           <input type="text" name="fullname" class="form-control" placeholder="Full Name" required />
           <div class="input-group-text"><span class="bi bi-person"></span></div>

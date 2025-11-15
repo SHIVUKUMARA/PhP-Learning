@@ -11,9 +11,18 @@ $this->load->view('partials/header');
 
   <div class="card">
     <div class="card-body login-card-body">
+
+      <?php if($this->session->flashdata('error')): ?>
+      <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
+      <?php endif; ?>
+
+      <?php if($this->session->flashdata('success')): ?>
+      <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
+      <?php endif; ?>
+
       <p class="login-box-msg">Sign in to start your session</p>
 
-      <form action="<?= site_url('auth/login_submit'); ?>" method="post">
+      <?= form_open('auth/login_submit') ?>
         <div class="input-group mb-3">
           <input type="email" name="email" class="form-control" placeholder="Email" required />
           <div class="input-group-text"><span class="bi bi-envelope"></span></div>
