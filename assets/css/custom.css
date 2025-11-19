@@ -1,0 +1,25 @@
+/* User Information table */
+.status-switch:checked {
+	background-color: #28a745;
+	border-color: #28a745;
+}
+
+.status-switch:not(:checked) {
+	background-color: #dc3545;
+	border-color: #dc3545;
+}
+
+.status-switch {
+	pointer-events: none;
+	cursor: default;
+}
+
+.table-bordered-vertical th,
+.table-bordered-vertical td {
+	border-right: 1px solid #dee2e6;
+}
+
+.table-bordered-vertical th:last-child,
+.table-bordered-vertical td:last-child {
+	border-right: none;
+}

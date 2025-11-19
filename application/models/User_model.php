@@ -33,5 +33,31 @@ class User_model extends CI_Model {
         }
         return false;
     }
+
+    public function get_user_by_id($id){
+        return $this->db->get_where('users', ['id' => $id])->row();
+    }
+
+    public function update_user($id, $data){
+        $this->db->where('id', $id);
+        return $this->db->update('users', $data);
+    }
+
+    public function delete_user($id){
+        $this->db->where('id', $id);
+        return $this->db->delete('users');
+    }
+
+    // Fetch users with limit and offset
+    public function get_users($limit, $offset){
+        $this->db->order_by('id', 'ASC');
+        $query = $this->db->get('users', $limit, $offset);
+        return $query->result();
+    }
+
+    // Get total users count
+    public function get_total_users(){
+        return $this->db->count_all('users');
+    }
 }
 ?>

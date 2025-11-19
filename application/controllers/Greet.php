@@ -19,6 +19,7 @@ class Greet extends CI_Controller {
         }
 
         $data['fullname'] = $this->session->userdata('fullname');
+        $data['body_class'] = 'hold-transition login-page';
         $this->load->view('dashboard/greet_message', $data);
     }
 }

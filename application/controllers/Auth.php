@@ -12,14 +12,13 @@ class Auth extends CI_Controller {
     public function __construct(){
         parent::__construct();
         $this->load->model('User_model');
-        $this->load->library('session');
-        $this->load->library('form_validation');
-        $this->load->helper(['url', 'form', 'security']);
     }
 
     // Register page
     public function register(){
-        $this->load->view('auth/register');
+        $this->redirect_if_logged_in();
+        $data['body_class'] = 'hold-transition login-page';
+        $this->load->view('auth/register', $data);
     }
 
     // Handling registration form submission
@@ -52,7 +51,9 @@ class Auth extends CI_Controller {
 
     // Login page
     public function login(){
-        $this->load->view('auth/login');
+        $this->redirect_if_logged_in();
+        $data['body_class'] = 'hold-transition login-page';
+        $this->load->view('auth/login', $data);
     }
 
     // Handling login
@@ -83,6 +84,20 @@ class Auth extends CI_Controller {
             $this->session->set_flashdata('error', 'Invalid email or password.');
             redirect('auth/login');
         }
+    }
+
+    // checking if user already logged-in or not
+    private function redirect_if_logged_in() {
+    if ($this->session->userdata('logged_in')) {
+        redirect('greet');
+    }
+    }
+
+    // Forgot Password page
+    public function forgot_password(){
+        $data['body_class'] = 'hold-transition login-page';
+        $this->redirect_if_logged_in();
+        $this->load->view('auth/forgot_password', $data);
     }
 
     // Logout

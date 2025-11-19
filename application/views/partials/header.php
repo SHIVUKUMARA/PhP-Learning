@@ -14,8 +14,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="<?= base_url('assets/css/bootstrap-icons.min.css'); ?>">
 
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/css/index.css'); ?>">
+
+    <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
 </head>
 
-<body class="<?= $body_class ?? 'hold-transition login-page'; ?>">
+<body class="<?= $body_class ?? 'hold-transition sidebar-mini layout-fixed'; ?>">
