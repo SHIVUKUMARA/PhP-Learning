@@ -5,6 +5,8 @@ $this->load->view('partials/header');
 ?>
 
 <div class="login-box" style="max-width: 500px; width: 100%;">
+<!-- <? $this->load->view('partials/navbar'); ?>
+<? $this->load->view('partials/sidebar'); ?> -->
     <div class="card card-primary card-outline shadow-lg">
         <div class="card-header d-flex justify-content-center align-items-center">
             <h3 class="card-title m-0">
@@ -34,6 +36,7 @@ $this->load->view('partials/header');
 
         </div>
     </div>
+    <!-- <? $this->load->view('partials/footer'); ?> -->
 </div>
 
 <?php $this->load->view('partials/footer'); ?>
