@@ -4,97 +4,92 @@ $data['body_class'] = "hold-transition sidebar-mini layout-fixed";
 $this->load->view('partials/header', $data); 
 ?>
 
-<nav class="main-header navbar navbar-expand navbar-light bg-light shadow-sm mb-3">
-    <div class="container-fluid">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a href="<?= site_url('dashboard/table'); ?>" class="nav-link">
-                    <i class="fas fa-arrow-left"></i> Back to Users Table
-                </a>
-            </li>
-        </ul>
-        <span class="navbar-text ms-auto fw-bold">
-            Create Admin User
-        </span>
-    </div>
-</nav>
+<div class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+    <div class="app-wrapper">
 
-<div class="content-wrapper" style="margin-top: 4rem;">
-    <div class="content">
-        <div class="container d-flex justify-content-center align-items-center" style="min-height:70vh;">
+        <?php $this->load->view('navbar/headernav', ['user' => (object)[
+            'fullname' => $this->session->userdata('fullname'),
+            'created_at' => $this->session->userdata('created_at') ?? date('Y-m-d')
+        ]]); ?>
 
-            <div class="card shadow-lg border-0 rounded-lg text-center" style="width: 450px; background-color: #f8ea687a;">
-                <div class="position-relative">
-                    <img src="<?= base_url('assets/images/user8-128x128.jpg'); ?>" 
-                         class="rounded-circle border border-5 border-grey shadow-sm" 
-                         alt="User Avatar" 
-                         style="width: 120px; height: 120px; object-fit: cover; position: absolute; top: -50px; left: 50%; transform: translateX(-50%);">
-                </div>
+        <?php $this->load->view('navbar/sidebar'); ?>
 
-                <div class="card-body mt-5 p-4">
-                    <?php if($this->session->flashdata('success')): ?>
-                        <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
-                    <?php endif; ?>
-                    <?php if($this->session->flashdata('error')): ?>
-                        <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
-                    <?php endif; ?>
-
-                    <?= form_open('dashboard/create_admin') ?>
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" required>
-                        <label for="fullname">Full Name</label>
+        <main class="app-main d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px); padding: 20px;">
+            <div class="d-flex justify-content-center align-items-center w-100" style="min-height: 100%;">
+                <div class="card shadow-lg border-0 rounded-lg text-center" style="width: 400px; background-color: #f8ea687a;">
+                    <div class="position-relative mt-5">
+                        <img src="<?= base_url('assets/images/user8-128x128.jpg'); ?>" 
+                             class="rounded-circle border border-5 border-grey shadow-sm" 
+                             alt="User Avatar" 
+                             style="width: 100px; height: 100px; object-fit: cover; position: absolute; top: -40px; left: 50%; transform: translateX(-50%);">
                     </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="fname" name="fname" placeholder="First Name">
-                                <label for="fname">First Name</label>
+                    <div class="card-body mt-5 p-3">
+                        <?php if($this->session->flashdata('success')): ?>
+                            <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
+                        <?php endif; ?>
+                        <?php if($this->session->flashdata('error')): ?>
+                            <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
+                        <?php endif; ?>
+
+                        <?= form_open('dashboard/create_admin', ['novalidate' => true]) ?>
+                        <div class="form-floating mb-2">
+                            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" required autocomplete="off">
+                            <label for="fullname">Full Name</label>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="fname" name="fname" placeholder="First Name" autocomplete="off">
+                                    <label for="fname">First Name</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lname" name="lname" placeholder="Last Name" autocomplete="off">
+                                    <label for="lname">Last Name</label>
+                                </div>
                             </div>
                         </div>
-                        <div class="col">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="lname" name="lname" placeholder="Last Name">
-                                <label for="lname">Last Name</label>
-                            </div>
+
+                        <div class="form-floating mb-2">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required autocomplete="off">
+                            <label for="email">Email</label>
                         </div>
+
+                        <div class="form-floating mb-2">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required autocomplete="off">
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div class="form-check mb-2 text-start">
+                            <input class="form-check-input" type="checkbox" name="agree_terms" value="1" id="agree_terms" required>
+                            <label class="form-check-label" for="agree_terms">
+                                Agree to Terms
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <button type="submit" class="btn btn-success btn-lg shadow-sm" name="save" value="create">
+                                <i class="fas fa-save me-1"></i> Create
+                            </button>
+                            <a href="<?= site_url('dashboard'); ?>" class="btn btn-secondary btn-lg shadow-sm">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                        </div>
+                        <?= form_close(); ?>
                     </div>
 
-                    <div class="form-floating mb-3">
-                        <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
-                        <label for="email">Email</label>
+                    <div class="card-footer text-center" style="background-color: #f8ea687a;">
+                        <small class="text-muted">You can create a new admin anytime.</small>
                     </div>
-
-                    <div class="form-floating mb-3">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                        <label for="password">Password</label>
-                    </div>
-
-                    <div class="form-check mb-3 text-start">
-                        <input class="form-check-input" type="checkbox" name="agree_terms" value="1" id="agree_terms" required>
-                        <label class="form-check-label" for="agree_terms">
-                            Agree to Terms
-                        </label>
-                    </div>
-
-                    <div class="d-flex justify-content-center gap-3 mt-4">
-                        <button type="submit" class="btn btn-success btn-lg shadow-sm" name="save" value="create">
-                            <i class="fas fa-save me-1"></i> Create
-                        </button>
-                        <a href="<?= site_url('dashboard'); ?>" class="btn btn-secondary btn-lg shadow-sm">
-                            <i class="fas fa-times me-1"></i> Cancel
-                        </a>
-                    </div>
-
-                    <?= form_close(); ?>
-                </div>
-
-                <div class="card-footer text-center" style="background-color: #f8ea687a;">
-                    <small class="text-muted">You can create a new admin anytime.</small>
                 </div>
             </div>
+        </main>
 
-        </div>
+        <?php $this->load->view('navbar/footer'); ?>
+
     </div>
 </div>
 

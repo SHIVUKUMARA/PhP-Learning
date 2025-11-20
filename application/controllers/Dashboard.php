@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
  * @property User_model $User_model
@@ -10,16 +10,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @property CI_Uri $uri
  */
 
-class Dashboard extends CI_Controller {
+class Dashboard extends CI_Controller
+{
 
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
         $this->load->model('User_model');
         $this->load->library('pagination');
     }
 
     // Dashboard main page
-    public function dashboard() {
+    public function dashboard()
+    {
         if (!$this->session->userdata('logged_in')) {
             redirect('auth/login');
         }
@@ -29,7 +32,8 @@ class Dashboard extends CI_Controller {
     }
 
     // Users table with pagination
-    public function table() {
+    public function table()
+    {
         if (!$this->session->userdata('logged_in')) {
             redirect('auth/login');
         }
@@ -77,7 +81,8 @@ class Dashboard extends CI_Controller {
     }
 
     // View user
-    public function view_user($id){
+    public function view_user($id)
+    {
         if (!$this->session->userdata('logged_in')) {
             redirect('auth/login');
         }
@@ -87,7 +92,8 @@ class Dashboard extends CI_Controller {
     }
 
     // Edit user
-    public function edit_user($id){
+    public function edit_user($id)
+    {
         if (!$this->session->userdata('logged_in')) redirect('auth/login');
 
         $data['user'] = $this->User_model->get_user_by_id($id);
@@ -110,61 +116,61 @@ class Dashboard extends CI_Controller {
     }
 
     // Delete user
-    public function delete_user($id){
+    public function delete_user($id)
+    {
         if (!$this->session->userdata('logged_in')) redirect('auth/login');
         $this->User_model->delete_user($id);
         $this->session->set_flashdata('success', 'User deleted successfully!');
         redirect('dashboard/table');
     }
 
-    public function create_admin() {
-    if (!$this->session->userdata('logged_in')) {
-        redirect('auth/login');
-    }
-
-    if ($this->input->post('save') === 'create') {
-
-        // Collect form inputs
-        $fullname = $this->input->post('fullname', TRUE);
-        $fname    = $this->input->post('fname', TRUE);
-        $lname    = $this->input->post('lname', TRUE);
-        $email    = $this->input->post('email', TRUE);
-        $password = $this->input->post('password', TRUE);
-
-        // Validate required fields
-        if (!$fullname || !$email || !$password) {
-            $this->session->set_flashdata('error', 'Full Name, Email, and Password are required!');
-            redirect('dashboard/create_admin');
+    public function create_admin()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('auth/login');
         }
 
-        // Check if email already exists
-        if ($this->User_model->email_exists($email)) {
-            $this->session->set_flashdata('error', 'Email already exists!');
-            redirect('dashboard/create_admin');
+        if ($this->input->post('save') === 'create') {
+
+            // Collect form inputs
+            $fullname = $this->input->post('fullname', TRUE);
+            $fname    = $this->input->post('fname', TRUE);
+            $lname    = $this->input->post('lname', TRUE);
+            $email    = $this->input->post('email', TRUE);
+            $password = $this->input->post('password', TRUE);
+
+            // Validate required fields
+            if (!$fullname || !$email || !$password) {
+                $this->session->set_flashdata('error', 'Full Name, Email, and Password are required!');
+                redirect('dashboard/create_admin');
+            }
+
+            // Check if email already exists
+            if ($this->User_model->email_exists($email)) {
+                $this->session->set_flashdata('error', 'Email already exists!');
+                redirect('dashboard/create_admin');
+            }
+
+            // Prepare data
+            $data = [
+                'fullname'    => $fullname,
+                'fname'       => $fname ?: NULL,
+                'lname'       => $lname ?: NULL,
+                'email'       => $email,
+                'password'    => password_hash($password, PASSWORD_BCRYPT),
+                'status'      => 'active',
+                'agree_terms' => 1,
+                'created_at'  => date('Y-m-d H:i:s'),
+                'last_updated' => date('Y-m-d H:i:s')
+            ];
+
+            // Insert into database
+            $this->User_model->register($data);
+            $this->session->set_flashdata('success', 'Admin user created successfully!');
+            redirect('dashboard/table');
         }
 
-        // Prepare data
-        $data = [
-            'fullname'    => $fullname,
-            'fname'       => $fname ?: NULL,
-            'lname'       => $lname ?: NULL,
-            'email'       => $email,
-            'password'    => password_hash($password, PASSWORD_BCRYPT),
-            'status'      => 'active',
-            'agree_terms' => 1,
-            'created_at'  => date('Y-m-d H:i:s'),
-            'last_updated'=> date('Y-m-d H:i:s')
-        ];
-
-        // Insert into database
-        $this->User_model->register($data);
-        $this->session->set_flashdata('success', 'Admin user created successfully!');
-        redirect('dashboard/table');
+        // Load the create view
+        $this->load->view('profile/create');
     }
-
-    // Load the create view
-    $this->load->view('profile/create');
-    }
-
 }
-?>
