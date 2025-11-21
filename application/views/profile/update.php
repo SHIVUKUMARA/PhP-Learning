@@ -18,16 +18,14 @@ $this->load->view('partials/header', $data);
 
         <main class="app-main d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px); padding: 20px;">
             <div class="d-flex justify-content-center align-items-center w-100" style="min-height: 100%;">
-                <div class="card shadow-lg border-0 rounded-lg text-center" style="width: 450px; background-color: #f8ea687a; position: relative; padding-top: 60px;">
+                <div class="card shadow-lg border-0 rounded-lg text-center" style="width: 450px; background-color: #f8ea687a; position: relative; padding-top: 10px;">
 
                     <div class="position-relative">
-                        <img src="<?= base_url('assets/images/user8-128x128.jpg'); ?>"
-                            class="rounded-circle border border-5 border-grey shadow-sm"
-                            alt="User Avatar"
-                            style="width: 120px; height: 120px; object-fit: cover; position: absolute; top: -55px; left: 50%; transform: translateX(-50%);" />
+                        <img src="<?= $user->avatar_url; ?>" class="rounded-circle border border-5 border-grey shadow-sm"
+                            style="width:120px;height:120px;object-fit:cover;">
                     </div>
 
-                    <div class="card-body mt-5 p-4">
+                    <div class="card-body p-4">
 
                         <?php if ($this->session->flashdata('success')): ?>
                             <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
@@ -36,7 +34,7 @@ $this->load->view('partials/header', $data);
                             <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
                         <?php endif; ?>
 
-                        <?= form_open('profile/update') ?>
+                        <?= form_open_multipart('profile/update') ?>
                         <input type="hidden" name="user_id" value="<?= $user->id ?>">
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="fullname" name="fullname"
@@ -75,6 +73,11 @@ $this->load->view('partials/header', $data);
                             <label for="email">Email</label>
                         </div>
 
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-bold">Profile Image</label>
+                            <input type="file" name="userfile" class="form-control">
+                        </div>
+
                         <div class="d-flex justify-content-center gap-2 mt-4">
                             <button type="submit" class="btn btn-success btn-lg shadow-sm">
                                 <i class="fas fa-save me-1"></i> Save Changes
@@ -102,3 +105,13 @@ $this->load->view('partials/header', $data);
 </div>
 
 <?php $this->load->view('partials/footer'); ?>
+
+<script>
+    document.querySelector('input[name="userfile"]').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const img = document.querySelector('.position-relative img');
+            img.src = URL.createObjectURL(file);
+        }
+    });
+</script>

@@ -5,6 +5,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property User_model $User_model
  * @property CI_Session $session
  * @property CI_Input $input
+ * @property CI_Upload $upload
  */
 class Profile extends CI_Controller
 {
@@ -21,16 +22,16 @@ class Profile extends CI_Controller
     // Show Profile Page of any user
     public function profile($user_id = null)
     {
-        // If no user_id provided, show logged-in user
         if (!$user_id) {
             $user_id = $this->session->userdata('user_id');
         }
 
         $data['user'] = $this->User_model->get_user_by_id($user_id);
-
         if (!$data['user']) {
             show_404();
         }
+
+        $this->set_avatar_url($data['user']);
 
         $this->load->view('profile/profile', $data);
     }
@@ -43,10 +44,11 @@ class Profile extends CI_Controller
         }
 
         $data['user'] = $this->User_model->get_user_by_id($user_id);
-
         if (!$data['user']) {
             show_404();
         }
+
+        $this->set_avatar_url($data['user']);
 
         $this->load->view('profile/edit', $data);
     }
@@ -64,12 +66,42 @@ class Profile extends CI_Controller
             'status'   => $this->input->post('status')
         ];
 
-        if ($this->User_model->update_user($editing_user, $data)) {
+        if (isset($_FILES['userfile']) && $_FILES['userfile']['name'] != '') {
 
+            $upload_dir = FCPATH . 'assets/uploads/';
+
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, TRUE);
+            }
+
+            $config['upload_path']   = $upload_dir;
+            $config['allowed_types'] = 'jpg|jpeg|png|gif';
+            $config['max_size']      = 5120;
+            $config['encrypt_name']  = TRUE;
+
+            $this->load->library('upload');
+            $this->upload->initialize($config, TRUE);
+
+            if (!$this->upload->do_upload('userfile')) {
+                $this->session->set_flashdata('error', $this->upload->display_errors());
+                redirect('profile/update/' . $editing_user);
+                return;
+            } else {
+                $upload_data = $this->upload->data();
+                $data['avatar'] = $upload_data['file_name'];
+
+                // Delete old image if exists
+                $old = $this->User_model->get_user_by_id($editing_user);
+                if (!empty($old->avatar) && file_exists($upload_dir . $old->avatar)) {
+                    unlink($upload_dir . $old->avatar);
+                }
+            }
+        }
+
+        if ($this->User_model->update_user($editing_user, $data)) {
             if ($logged_in_user == $editing_user) {
                 $this->session->set_userdata('fullname', $this->input->post('fullname'));
             }
-
             $this->session->set_flashdata('success', 'Profile updated successfully.');
         } else {
             $this->session->set_flashdata('error', 'Failed to update profile.');
@@ -97,5 +129,14 @@ class Profile extends CI_Controller
             $this->session->set_flashdata('error', 'Failed to delete user.');
             redirect('profile/profile/' . $user_id);
         }
+    }
+
+    // Helper function to set avatar URL
+    private function set_avatar_url(&$user)
+    {
+        $upload_dir = FCPATH . 'assets/uploads/';
+        $user->avatar_url = (!empty($user->avatar) && file_exists($upload_dir . $user->avatar))
+            ? base_url('assets/uploads/' . $user->avatar)
+            : base_url('assets/uploads/user_default.png');
     }
 }

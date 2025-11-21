@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -6,7 +7,7 @@
 
 <body>
 
-    <h3>Your file was successfully uploaded!</h3>
+    <h3>Image Uploaded Successfully!</h3>
 
     <ul>
         <?php foreach ($upload_data as $item => $value): ?>
@@ -14,7 +15,10 @@
         <?php endforeach; ?>
     </ul>
 
-    <p><?php echo anchor('upload', 'Upload Another File!'); ?></p>
+    <img src="<?php echo base_url('uploads/profile/' . $upload_data['file_name']); ?>" width="200">
+
+    <br><br>
+    <a href="<?php echo site_url('upload'); ?>">Upload Another</a>
 
 </body>
 

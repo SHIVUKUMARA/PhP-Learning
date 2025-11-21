@@ -19,11 +19,12 @@ $this->load->view('partials/header', $data);
                 <div class="card shadow-lg border-0 rounded-lg text-center" style="width: 400px; background-color: #a0ce4b86; position: relative; padding-top: 10px;">
 
                     <div class="position-absolute" style="top: -50px; left: 50%; transform: translateX(-50%);">
-                        <img src="<?= base_url('assets/images/user8-128x128.jpg'); ?>"
+                        <img src="<?= $user->avatar_url; ?>"
                             class="rounded-circle border border-5 border-grey shadow-sm"
                             alt="User Avatar"
                             style="width: 100px; height: 100px; object-fit: cover;">
                     </div>
+
 
                     <div class="card-body mt-4">
                         <h3 class="fw-bold mb-2">
