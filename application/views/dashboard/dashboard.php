@@ -18,7 +18,7 @@ $this->load->view('partials/header', $data);
                         <div class="col-md-6 text-end">
                             <?= form_open('dashboard/create_admin'); ?>
                             <button type="submit" class="btn btn-primary" name="save" value="create">
-                                Create Admin
+                                Create Users
                             </button>
                             <?= form_close(); ?>
                         </div>

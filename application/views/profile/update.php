@@ -74,7 +74,8 @@ $this->load->view('partials/header', $data);
                         </div>
 
                         <div class="form-floating mb-3">
-                            <select id="role" name="role" class="form-select">
+                            <select id="role" name="role" class="form-select"
+                                <?= ($this->session->userdata('role') !== 'admin') ? 'disabled' : ''; ?>>
                                 <option value="customer" <?= ($user->role === 'customer') ? 'selected' : ''; ?>>Customer</option>
                                 <option value="manager" <?= ($user->role === 'manager') ? 'selected' : ''; ?>>Manager</option>
                                 <option value="admin" <?= ($user->role === 'admin') ? 'selected' : ''; ?>>Admin</option>

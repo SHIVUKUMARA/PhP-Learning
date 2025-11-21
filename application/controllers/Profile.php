@@ -85,8 +85,13 @@ class Profile extends CI_Controller
             'fname'    => $this->input->post('fname'),
             'lname'    => $this->input->post('lname'),
             'status'   => $this->input->post('status'),
-            'role'     => $this->input->post('role')
         ];
+
+        // Only admin can update role
+        $current_role = $this->session->userdata('role');
+        if ($current_role === 'admin' && $this->input->post('role')) {
+            $data['role'] = $this->input->post('role');
+        }
 
         if (!empty($_FILES['userfile']['name'])) {
 
@@ -107,7 +112,7 @@ class Profile extends CI_Controller
             if (!$this->upload->do_upload('userfile')) {
                 $error = $this->upload->display_errors();
                 $this->session->set_flashdata('error', $error);
-                redirect('profile/edit/' . $editing_user);
+                redirect('profile/update/' . $editing_user);
                 return;
             }
 
@@ -118,7 +123,6 @@ class Profile extends CI_Controller
         $this->User_model->update_user($editing_user, $data);
         redirect('profile/profile/' . $editing_user);
     }
-
 
     public function delete($user_id = null)
     {
