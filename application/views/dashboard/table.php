@@ -67,18 +67,23 @@ $this->load->view('partials/header', $data);
                                                 <td><?= date('M d, Y - h:i A', strtotime($u->created_at)); ?></td>
                                                 <td><?= date('M d, Y - h:i A', strtotime($u->last_updated)); ?></td>
                                                 <td>
-                                                    <?php if ($u->can_view): ?>
-                                                        <a href="<?= base_url('dashboard/view_user/' . $u->id); ?>" class="btn btn-sm btn-primary me-1"><i class="bi bi-eye"></i></a>
-                                                    <?php endif; ?>
+                                                    <?php if ($u->can_view || $u->can_edit || $u->can_delete): ?>
+                                                        <?php if ($u->can_view): ?>
+                                                            <a href="<?= base_url('dashboard/view_user/' . $u->id); ?>" class="btn btn-sm btn-primary me-1"><i class="bi bi-eye"></i></a>
+                                                        <?php endif; ?>
 
-                                                    <?php if ($u->can_edit): ?>
-                                                        <a href="<?= base_url('dashboard/edit_user/' . $u->id); ?>" class="btn btn-sm btn-info me-1"><i class="bi bi-pencil-square"></i></a>
-                                                    <?php endif; ?>
+                                                        <?php if ($u->can_edit): ?>
+                                                            <a href="<?= base_url('dashboard/edit_user/' . $u->id); ?>" class="btn btn-sm btn-info me-1"><i class="bi bi-pencil-square"></i></a>
+                                                        <?php endif; ?>
 
-                                                    <?php if ($u->can_delete): ?>
-                                                        <a href="<?= base_url('dashboard/delete_user/' . $u->id); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?');"><i class="bi bi-trash"></i></a>
+                                                        <?php if ($u->can_delete): ?>
+                                                            <a href="<?= base_url('dashboard/delete_user/' . $u->id); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?');"><i class="bi bi-trash"></i></a>
+                                                        <?php endif; ?>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">No Access</span>
                                                     <?php endif; ?>
                                                 </td>
+
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>

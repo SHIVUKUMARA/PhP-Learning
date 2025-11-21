@@ -1,7 +1,7 @@
-<?php 
+<?php
 $data['title'] = "Create Admin | AdminLTE";
-$data['body_class'] = "hold-transition sidebar-mini layout-fixed";  
-$this->load->view('partials/header', $data); 
+$data['body_class'] = "hold-transition sidebar-mini layout-fixed";
+$this->load->view('partials/header', $data);
 ?>
 
 <div class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
@@ -18,21 +18,21 @@ $this->load->view('partials/header', $data);
             <div class="d-flex justify-content-center align-items-center w-100" style="min-height: 100%;">
                 <div class="card shadow-lg border-0 rounded-lg text-center" style="width: 400px; background-color: #f8ea687a;">
                     <div class="position-relative mt-5">
-                        <img src="<?= base_url('assets/images/user8-128x128.jpg'); ?>" 
-                             class="rounded-circle border border-5 border-grey shadow-sm" 
-                             alt="User Avatar" 
-                             style="width: 100px; height: 100px; object-fit: cover; position: absolute; top: -40px; left: 50%; transform: translateX(-50%);">
+                        <img src="<?= base_url('assets/images/user8-128x128.jpg'); ?>"
+                            class="rounded-circle border border-5 border-grey shadow-sm"
+                            alt="User Avatar"
+                            style="width: 100px; height: 100px; object-fit: cover; position: absolute; top: -40px; left: 50%; transform: translateX(-50%);">
                     </div>
 
                     <div class="card-body mt-5 p-3">
-                        <?php if($this->session->flashdata('success')): ?>
+                        <?php if ($this->session->flashdata('success')): ?>
                             <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
                         <?php endif; ?>
-                        <?php if($this->session->flashdata('error')): ?>
+                        <?php if ($this->session->flashdata('error')): ?>
                             <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
                         <?php endif; ?>
 
-                        <?= form_open('dashboard/create_admin', ['novalidate' => true]) ?>
+                        <?= form_open('dashboard/create_admin'); ?>
                         <div class="form-floating mb-2">
                             <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" required autocomplete="off">
                             <label for="fullname">Full Name</label>
@@ -61,6 +61,15 @@ $this->load->view('partials/header', $data);
                         <div class="form-floating mb-2">
                             <input type="password" class="form-control" id="password" name="password" placeholder="Password" required autocomplete="off">
                             <label for="password">Password</label>
+                        </div>
+
+                        <div class="form-floating mb-2">
+                            <select class="form-select" id="role" name="role">
+                                <option value="customer" <?= (isset($role) && $role == 'customer') ? 'selected' : ''; ?>>Customer</option>
+                                <option value="manager" <?= (isset($role) && $role == 'manager') ? 'selected' : ''; ?>>Manager</option>
+                                <option value="admin" <?= (isset($role) && $role == 'admin') ? 'selected' : ''; ?>>Admin</option>
+                            </select>
+                            <label for="role">Role</label>
                         </div>
 
                         <div class="form-check mb-2 text-start">

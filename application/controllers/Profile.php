@@ -118,6 +118,11 @@ class Profile extends CI_Controller
 
             $upload_data = $this->upload->data();
             $data['avatar'] = $upload_data['file_name'];
+
+            $old = $this->User_model->get_user_by_id($editing_user);
+            if (!empty($old->avatar) && file_exists($upload_path . '/' . $old->avatar)) {
+                unlink($upload_path . '/' . $old->avatar);
+            }
         }
 
         $this->User_model->update_user($editing_user, $data);

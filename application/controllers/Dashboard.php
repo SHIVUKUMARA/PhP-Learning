@@ -161,6 +161,8 @@ class Dashboard extends CI_Controller
             redirect('auth/login');
         }
 
+        $data = [];
+
         if ($this->input->post('save') === 'create') {
 
             // Collect form inputs
@@ -169,40 +171,40 @@ class Dashboard extends CI_Controller
             $lname    = $this->input->post('lname', TRUE);
             $email    = $this->input->post('email', TRUE);
             $password = $this->input->post('password', TRUE);
+            $role     = $this->input->post('role', TRUE) ?: 'customer';
 
-            // Validate required fields
             if (!$fullname || !$email || !$password) {
-                $this->session->set_flashdata('error', 'Full Name, Email, and Password are required!');
-                redirect('dashboard/create_admin');
+                $data['error'] = 'Full Name, Email, and Password are required!';
+            } elseif ($this->User_model->email_exists($email)) {
+                $data['error'] = 'Email already exists!';
+            } else {
+                $user_data = [
+                    'fullname'    => $fullname,
+                    'fname'       => $fname ?: NULL,
+                    'lname'       => $lname ?: NULL,
+                    'email'       => $email,
+                    'password'    => $password,
+                    'role'        => $role,
+                    'status'      => 'active',
+                    'agree_terms' => 1,
+                    'created_at'  => date('Y-m-d H:i:s'),
+                    'last_updated' => date('Y-m-d H:i:s')
+                ];
+
+                $this->User_model->register($user_data);
+                $this->session->set_flashdata('success', 'User created successfully!');
+                redirect('dashboard/table');
+                return;
             }
 
-            // Check if email already exists
-            if ($this->User_model->email_exists($email)) {
-                $this->session->set_flashdata('error', 'Email already exists!');
-                redirect('dashboard/create_admin');
-            }
-
-            // Prepare data
-            $data = [
-                'fullname'    => $fullname,
-                'fname'       => $fname ?: NULL,
-                'lname'       => $lname ?: NULL,
-                'email'       => $email,
-                'password'    => $password,
-                'role'        => 'customer',
-                'status'      => 'active',
-                'agree_terms' => 1,
-                'created_at'  => date('Y-m-d H:i:s'),
-                'last_updated' => date('Y-m-d H:i:s')
-            ];
-
-            // Inserting into database
-            $this->User_model->register($data);
-            $this->session->set_flashdata('success', 'User created successfully!');
-            redirect('dashboard/table');
+            // Pass old input back to the view
+            $data['fullname'] = $fullname;
+            $data['fname']    = $fname;
+            $data['lname']    = $lname;
+            $data['email']    = $email;
+            $data['role']     = $role;
         }
 
-        // Load the create view
-        $this->load->view('profile/create');
+        $this->load->view('profile/create', $data);
     }
 }

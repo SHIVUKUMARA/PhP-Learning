@@ -2,6 +2,7 @@
 $data['title'] = "AdminLTE 4 | Dashboard";
 $this->load->view('partials/header', $data);
 ?>
+<?php $current_role = $this->session->userdata('role'); ?>
 
 <div class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
     <div class="app-wrapper">
@@ -16,11 +17,19 @@ $this->load->view('partials/header', $data);
                             <div>App Content Top Area</div>
                         </div>
                         <div class="col-md-6 text-end">
-                            <?= form_open('dashboard/create_admin'); ?>
-                            <button type="submit" class="btn btn-primary" name="save" value="create">
-                                Create Users
-                            </button>
-                            <?= form_close(); ?>
+                            <?php if ($current_role === 'admin'): ?>
+                                <?= form_open('dashboard/create_admin'); ?>
+                                <button type="submit" class="btn btn-primary" name="save" value="create">
+                                    <i class="bi bi-person-plus me-1"></i>
+                                    Create Users
+                                </button>
+                                <?= form_close(); ?>
+                            <?php else: ?>
+                                <button type="button" class="btn btn-primary" id="no-access-btn">
+                                    <i class="bi bi-person-plus me-1"></i>
+                                    Create Users
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -86,3 +95,14 @@ $this->load->view('partials/header', $data);
 </div>
 
 <?php $this->load->view('partials/footer'); ?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const noAccessBtn = document.getElementById('no-access-btn');
+        if (noAccessBtn) {
+            noAccessBtn.addEventListener('click', function() {
+                alert("You don't have admin access!");
+            });
+        }
+    });
+</script>
