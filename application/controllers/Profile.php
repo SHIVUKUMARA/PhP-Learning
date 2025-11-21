@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-/**     
+/**
  * @property User_model $User_model
  * @property CI_Session $session
  * @property CI_Input $input
@@ -19,119 +19,125 @@ class Profile extends CI_Controller
         }
     }
 
-    // Show Profile Page of any user
+    private function can_access($target_user_id, $action)
+    {
+        $current_user_id = $this->session->userdata('user_id');
+        $role = $this->session->userdata('role');
+
+        if ($role === 'admin') return true;
+
+        if ($role === 'manager') {
+            if ($target_user_id == $current_user_id) return true;
+            if ($action === 'view') return true;
+            return false;
+        }
+
+        if ($role === 'customer') {
+            return $target_user_id == $current_user_id;
+        }
+
+        return false;
+    }
+
     public function profile($user_id = null)
     {
-        if (!$user_id) {
-            $user_id = $this->session->userdata('user_id');
+        if (!$user_id) $user_id = $this->session->userdata('user_id');
+
+        if (!$this->can_access($user_id, 'view')) {
+            show_error('Access Denied', 403);
         }
 
         $data['user'] = $this->User_model->get_user_by_id($user_id);
-        if (!$data['user']) {
-            show_404();
-        }
-
         $this->set_avatar_url($data['user']);
+
+        $data['can_edit']   = $this->can_access($user_id, 'edit');
+        $data['can_delete'] = $this->can_access($user_id, 'delete');
 
         $this->load->view('profile/profile', $data);
     }
 
-    // Show Edit Form
     public function edit($user_id = null)
     {
-        if (!$user_id) {
-            $user_id = $this->session->userdata('user_id');
+        if (!$user_id) $user_id = $this->session->userdata('user_id');
+
+        if (!$this->can_access($user_id, 'edit')) {
+            show_error('Access Denied', 403);
         }
 
         $data['user'] = $this->User_model->get_user_by_id($user_id);
-        if (!$data['user']) {
-            show_404();
-        }
+        if (!$data['user']) show_404();
 
         $this->set_avatar_url($data['user']);
 
-        $this->load->view('profile/edit', $data);
+        $this->load->view('profile/update', $data);
     }
 
-    // Handle Update
     public function update()
     {
-        $logged_in_user = $this->session->userdata('user_id');
-        $editing_user   = $this->input->post('user_id');
+        $editing_user = $this->input->post('user_id');
+
+        if (!$this->can_access($editing_user, 'edit')) {
+            show_error('Access Denied', 403);
+        }
 
         $data = [
             'fullname' => $this->input->post('fullname'),
             'fname'    => $this->input->post('fname'),
             'lname'    => $this->input->post('lname'),
-            'status'   => $this->input->post('status')
+            'status'   => $this->input->post('status'),
+            'role'     => $this->input->post('role')
         ];
 
-        if (isset($_FILES['userfile']) && $_FILES['userfile']['name'] != '') {
+        if (!empty($_FILES['userfile']['name'])) {
 
-            $upload_dir = FCPATH . 'assets/uploads/';
+            $upload_path = realpath(APPPATH . '../assets/uploads');
 
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, TRUE);
+            if (!$upload_path) {
+                show_error('Upload directory not found');
             }
 
-            $config['upload_path']   = $upload_dir;
+            $config['upload_path']   = $upload_path;
             $config['allowed_types'] = 'jpg|jpeg|png|gif';
             $config['max_size']      = 5120;
             $config['encrypt_name']  = TRUE;
 
             $this->load->library('upload');
-            $this->upload->initialize($config, TRUE);
+            $this->upload->initialize($config);
 
             if (!$this->upload->do_upload('userfile')) {
-                $this->session->set_flashdata('error', $this->upload->display_errors());
-                redirect('profile/update/' . $editing_user);
+                $error = $this->upload->display_errors();
+                $this->session->set_flashdata('error', $error);
+                redirect('profile/edit/' . $editing_user);
                 return;
-            } else {
-                $upload_data = $this->upload->data();
-                $data['avatar'] = $upload_data['file_name'];
-
-                // Delete old image if exists
-                $old = $this->User_model->get_user_by_id($editing_user);
-                if (!empty($old->avatar) && file_exists($upload_dir . $old->avatar)) {
-                    unlink($upload_dir . $old->avatar);
-                }
             }
+
+            $upload_data = $this->upload->data();
+            $data['avatar'] = $upload_data['file_name'];
         }
 
-        if ($this->User_model->update_user($editing_user, $data)) {
-            if ($logged_in_user == $editing_user) {
-                $this->session->set_userdata('fullname', $this->input->post('fullname'));
-            }
-            $this->session->set_flashdata('success', 'Profile updated successfully.');
-        } else {
-            $this->session->set_flashdata('error', 'Failed to update profile.');
-        }
-
+        $this->User_model->update_user($editing_user, $data);
         redirect('profile/profile/' . $editing_user);
     }
 
-    // Delete Profile
+
     public function delete($user_id = null)
     {
-        if (!$user_id) {
-            $user_id = $this->session->userdata('user_id');
+        if (!$user_id) $user_id = $this->session->userdata('user_id');
+
+        if (!$this->can_access($user_id, 'delete')) {
+            show_error('Access Denied', 403);
         }
 
-        if ($this->User_model->delete_user($user_id)) {
-            if ($user_id == $this->session->userdata('user_id')) {
-                $this->session->sess_destroy();
-                redirect('register');
-            } else {
-                $this->session->set_flashdata('success', 'User deleted successfully.');
-                redirect('dashboard/table'); // redirect to user list
-            }
+        $this->User_model->delete_user($user_id);
+
+        if ($user_id == $this->session->userdata('user_id')) {
+            $this->session->sess_destroy();
+            redirect('login');
         } else {
-            $this->session->set_flashdata('error', 'Failed to delete user.');
-            redirect('profile/profile/' . $user_id);
+            redirect('dashboard/table');
         }
     }
 
-    // Helper function to set avatar URL
     private function set_avatar_url(&$user)
     {
         $upload_dir = FCPATH . 'assets/uploads/';

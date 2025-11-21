@@ -1,12 +1,12 @@
-<?php 
-$segment1 = $this->uri->segment(1); 
-$segment2 = $this->uri->segment(2); 
+<?php
+$segment1 = $this->uri->segment(1);
+$segment2 = $this->uri->segment(2);
 ?>
 
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
     <div class="sidebar-brand">
         <a href="<?= base_url('dashboard/dashboard') ?>" class="brand-link">
-            <img src="<?= base_url('assets/images/AdminLTELogo.png'); ?>" alt="AdminLTE Logo" class="brand-image opacity-75 shadow"/>
+            <img src="<?= base_url('assets/images/AdminLTELogo.png'); ?>" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
             <span class="brand-text fw-light">AdminLTE 4</span>
         </a>
     </div>
@@ -16,8 +16,8 @@ $segment2 = $this->uri->segment(2);
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation">
 
                 <li class="nav-item">
-                    <a href="<?= base_url('dashboard/dashboard') ?>" 
-                       class="nav-link <?= ($segment2 == 'dashboard') ? 'active' : '' ?>">
+                    <a href="<?= base_url('dashboard/dashboard') ?>"
+                        class="nav-link <?= ($segment2 == 'dashboard') ? 'active' : '' ?>">
                         <i class="nav-icon bi bi-speedometer"></i>
                         <p>Dashboard</p>
                     </a>
@@ -30,10 +30,10 @@ $segment2 = $this->uri->segment(2);
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="<?= base_url('dashboard/table') ?>" 
-                               class="nav-link <?= ($segment2 == 'table') ? 'active' : '' ?>">
+                            <a href="<?= base_url('dashboard/table') ?>"
+                                class="nav-link <?= ($segment2 == 'table') ? 'active' : '' ?>">
                                 <i class="nav-icon bi bi-circle"></i>
-                                <p>Admins Table</p>
+                                <p>Users Table</p>
                             </a>
                         </li>
                     </ul>

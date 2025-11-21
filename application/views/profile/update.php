@@ -73,6 +73,15 @@ $this->load->view('partials/header', $data);
                             <label for="email">Email</label>
                         </div>
 
+                        <div class="form-floating mb-3">
+                            <select id="role" name="role" class="form-select">
+                                <option value="customer" <?= ($user->role === 'customer') ? 'selected' : ''; ?>>Customer</option>
+                                <option value="manager" <?= ($user->role === 'manager') ? 'selected' : ''; ?>>Manager</option>
+                                <option value="admin" <?= ($user->role === 'admin') ? 'selected' : ''; ?>>Admin</option>
+                            </select>
+                            <label for="role">Role</label>
+                        </div>
+
                         <div class="mb-3 text-start">
                             <label class="form-label fw-bold">Profile Image</label>
                             <input type="file" name="userfile" class="form-control">

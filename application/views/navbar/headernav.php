@@ -33,7 +33,7 @@
                     <a href="#" class="dropdown-item">
                         <div class="d-flex">
                             <div class="flex-shrink-0">
-                                <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" alt="User Avatar" class="img-size-50 rounded-circle me-3"/>
+                                <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" alt="User Avatar" class="img-size-50 rounded-circle me-3" />
                             </div>
                             <div class="flex-grow-1">
                                 <h3 class="dropdown-item-title">
@@ -51,7 +51,7 @@
                     <a href="#" class="dropdown-item">
                         <div class="d-flex">
                             <div class="flex-shrink-0">
-                                <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" alt="User Avatar" class="img-size-50 rounded-circle me-3"/>
+                                <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" alt="User Avatar" class="img-size-50 rounded-circle me-3" />
                             </div>
                             <div class="flex-grow-1">
                                 <h3 class="dropdown-item-title">
@@ -69,7 +69,7 @@
                     <a href="#" class="dropdown-item">
                         <div class="d-flex">
                             <div class="flex-shrink-0">
-                                <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" alt="User Avatar" class="img-size-50 rounded-circle me-3"/>
+                                <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" alt="User Avatar" class="img-size-50 rounded-circle me-3" />
                             </div>
                             <div class="flex-grow-1">
                                 <h3 class="dropdown-item-title">
@@ -126,15 +126,19 @@
             <!-- User Menu -->
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                    <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" class="user-image rounded-circle shadow" alt="User Image"/>
-                    <span class="d-none d-md-inline"><?= $user->fullname; ?></span>
+                    <img src="<?= $user->avatar_url ?? base_url('assets/uploads/user_default.png'); ?>"
+                        class="user-image rounded-circle shadow"
+                        alt="User Image" />
+                    <span class="d-none d-md-inline"><?= htmlspecialchars($user->fullname); ?></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                     <li class="user-header text-bg-primary">
-                        <img src="<?= base_url('assets/images/user8-128x128.jpg') ?>" class="rounded-circle shadow" alt="User Image"/>
+                        <img src="<?= $user->avatar_url ?? base_url('assets/uploads/user_default.png'); ?>"
+                            class="rounded-circle shadow"
+                            alt="User Image" />
                         <p>
-                            <?= $user->fullname; ?> - Web Developer
-                            <small>Member since <?= date('M Y', strtotime($user->created_at)); ?></small>
+                            <?= htmlspecialchars($user->fullname); ?> - Web Developer
+                            <small>Member since <?= date('M Y', strtotime($user->created_at ?? 'now')); ?></small>
                         </p>
                     </li>
                     <li class="user-body">
@@ -150,6 +154,7 @@
                     </li>
                 </ul>
             </li>
+
         </ul>
     </div>
 </nav>

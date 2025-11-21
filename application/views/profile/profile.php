@@ -4,6 +4,11 @@ $data['body_class'] = "hold-transition sidebar-mini layout-fixed";
 $this->load->view('partials/header', $data);
 ?>
 
+<?php
+$can_edit   = isset($can_edit) ? $can_edit : false;
+$can_delete = isset($can_delete) ? $can_delete : false;
+?>
+
 <div class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
     <div class="app-wrapper">
 
@@ -42,16 +47,27 @@ $this->load->view('partials/header', $data);
                         </small>
 
                         <div class="d-flex justify-content-center gap-2">
-                            <a href="<?= site_url('dashboard/edit_user/' . $user->id); ?>" class="btn btn-warning btn-lg shadow-sm">
-                                <i class="fas fa-edit me-1"></i> Edit
-                            </a>
 
-                            <a href="<?= site_url('dashboard/delete_user/' . $user->id); ?>"
-                                class="btn btn-danger btn-lg shadow-sm"
-                                onclick="return confirm('Are you sure you want to delete this user?');">
-                                <i class="fas fa-trash me-1"></i> Delete
-                            </a>
+                            <?php if ($can_edit): ?>
+                                <a href="<?= site_url('profile/edit/' . $user->id); ?>" class="btn btn-warning btn-lg">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            <?php endif; ?>
+
+                            <?php if ($can_delete): ?>
+                                <a href="<?= site_url('profile/delete/' . $user->id); ?>"
+                                    class="btn btn-danger btn-lg"
+                                    onclick="return confirm('Are you sure?');">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            <?php endif; ?>
+                            <?php if (!$can_edit && !$can_delete): ?>
+                                <button class="btn btn-secondary btn-lg" onclick="window.history.back();">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            <?php endif; ?>
                         </div>
+
                     </div>
 
                     <div class="card-footer text-center" style="background-color: #a0ce4b86;">
