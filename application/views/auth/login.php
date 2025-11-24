@@ -1,7 +1,7 @@
-<?php 
-$title = "AdminLTE 4 | Login Page"; 
+<?php
+$title = "AdminLTE 4 | Login Page";
 $body_class = "login-page";
-$this->load->view('partials/header'); 
+$this->load->view('partials/header');
 ?>
 
 <div class="login-box">
@@ -12,41 +12,41 @@ $this->load->view('partials/header');
   <div class="card">
     <div class="card-body login-card-body">
 
-      <?php if($this->session->flashdata('error')): ?>
-      <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
+      <?php if ($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
       <?php endif; ?>
 
-      <?php if($this->session->flashdata('success')): ?>
-      <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
+      <?php if ($this->session->flashdata('success')): ?>
+        <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
       <?php endif; ?>
 
       <p class="login-box-msg">Sign in to start your session</p>
 
       <?= form_open('auth/login_submit') ?>
-        <div class="input-group mb-3">
-          <input type="email" name="email" class="form-control" placeholder="Email" required />
-          <div class="input-group-text"><span class="bi bi-envelope"></span></div>
-        </div>
+      <div class="input-group mb-3">
+        <input type="email" name="email" class="form-control" placeholder="Email" required />
+        <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+      </div>
 
-        <div class="input-group mb-3">
-          <input type="password" name="password" class="form-control" placeholder="Password" required />
-          <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
-        </div>
+      <div class="input-group mb-3">
+        <input type="password" name="password" class="form-control" placeholder="Password" required />
+        <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+      </div>
 
-        <div class="row">
-          <div class="col-8">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="rememberMe" />
-              <label class="form-check-label" for="rememberMe"> Remember Me </label>
-            </div>
-          </div>
-
-          <div class="col-4">
-            <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-primary">Sign In</button>
-            </div>
+      <div class="row">
+        <div class="col-8">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="rememberMe" />
+            <label class="form-check-label" for="rememberMe"> Remember Me </label>
           </div>
         </div>
+
+        <div class="col-4">
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Sign In</button>
+          </div>
+        </div>
+      </div>
       </form>
 
       <div class="social-auth-links text-center mb-3 d-grid gap-2">

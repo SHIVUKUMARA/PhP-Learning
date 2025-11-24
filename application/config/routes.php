@@ -68,3 +68,4 @@ $route['dashboard/delete_user/(:num)'] = 'dashboard/delete_user/$1';
 $route['dashboard/create_admin'] = 'dashboard/create_admin';
 $route['upload'] = 'upload/index';
 $route['upload/do_upload'] = 'upload/do_upload';
+$route['email'] = 'Email/index';
