@@ -6,6 +6,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property CI_Session $session
  * @property CI_Input $input
  * @property CI_Form_validation $form_validation
+ * @property CI_Email $email
  */
 class Auth extends CI_Controller
 {
@@ -114,6 +115,103 @@ class Auth extends CI_Controller
     public function logout()
     {
         $this->session->sess_destroy();
+        redirect('auth/login');
+    }
+
+    public function send_reset_link()
+    {
+        $email = $this->input->post('email', true);
+
+        if (!$email) {
+            $this->session->set_flashdata('error', 'Please enter your email.');
+            redirect('auth/forgot_password');
+        }
+
+        $user = $this->User_model->get_user_by_email($email);
+
+        if (!$user) {
+            $this->session->set_flashdata('error', 'Email not found.');
+            redirect('auth/forgot_password');
+        }
+
+        // Generate token & expiry
+        $token = bin2hex(random_bytes(50));
+        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        $this->User_model->save_reset_token($user->id, $token, $expiry);
+
+        $reset_link = base_url("auth/reset_password/$token");
+
+        // HTML email
+        $message = "
+    <html>
+    <body style='font-family: Arial, sans-serif;'>
+        <h2>Password Reset Request</h2>
+        <p>Hello {$user->fullname},</p>
+        <p>Click the link below to reset your password:</p>
+        <p><a href='{$reset_link}' style='padding: 10px 20px; background: #28a745; color: #fff; text-decoration: none;'>Reset Password</a></p>
+        <p>This link will expire in 1 hour.</p>
+    </body>
+    </html>
+    ";
+
+        // Send email
+        $this->load->library('email');
+        $this->email->from('shivukumaraspatil01@gmail.com', 'AdminLTE');
+        $this->email->to($email);
+        $this->email->subject('Reset Password Request');
+        $this->email->message($message);
+
+        if ($this->email->send()) {
+            $this->session->set_flashdata('success', 'Reset link sent to your email.');
+        } else {
+            $this->session->set_flashdata('error', 'Error sending email: ' . $this->email->print_debugger());
+        }
+
+        redirect('auth/forgot_password');
+    }
+
+    // Show Reset Password Form
+    public function reset_password($token = null)
+    {
+        if (!$token) {
+            show_404();
+            return;
+        }
+
+        $user = $this->User_model->get_user_by_token($token);
+
+        if (!$user) {
+            $this->session->set_flashdata('error', 'Invalid or expired reset token.');
+            redirect('auth/forgot_password');
+        }
+
+        $data['token'] = $token;
+        $this->load->view('auth/reset_password', $data);
+    }
+
+    // Handle Update Password Form Submission
+    public function update_password()
+    {
+        $token = $this->input->post('token', true);
+        $password = $this->input->post('password', true);
+
+        if (!$token || !$password) {
+            $this->session->set_flashdata('error', 'Invalid request.');
+            redirect('auth/forgot_password');
+        }
+
+        $user = $this->User_model->get_user_by_token($token);
+
+        if (!$user) {
+            $this->session->set_flashdata('error', 'Invalid or expired reset token.');
+            redirect('auth/forgot_password');
+        }
+
+        // Update password
+        $this->User_model->update_password($user->id, $password);
+        $this->User_model->clear_reset_token($user->id);
+
+        $this->session->set_flashdata('success', 'Password updated successfully. You can now login.');
         redirect('auth/login');
     }
 }

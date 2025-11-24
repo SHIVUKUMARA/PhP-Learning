@@ -93,4 +93,31 @@ class User_model extends CI_Model
             ? base_url('assets/uploads/' . $user->avatar) . '?t=' . time()
             : base_url('assets/uploads/user_default.png');
     }
+
+    public function get_user_by_email($email)
+    {
+        return $this->db->get_where('users', ['email' => $email])->row();
+    }
+
+    public function save_reset_token($user_id, $token, $expiry)
+    {
+        $this->db->update('users', ['reset_token' => $token, 'token_expiry' => $expiry], ['id' => $user_id]);
+    }
+
+    public function get_user_by_token($token)
+    {
+        return $this->db->where('reset_token', $token)
+            ->where('token_expiry >=', date('Y-m-d H:i:s'))
+            ->get('users')->row();
+    }
+
+    public function update_password($user_id, $password)
+    {
+        $this->db->update('users', ['password' => password_hash($password, PASSWORD_BCRYPT)], ['id' => $user_id]);
+    }
+
+    public function clear_reset_token($user_id)
+    {
+        $this->db->update('users', ['reset_token' => null, 'token_expiry' => null], ['id' => $user_id]);
+    }
 }

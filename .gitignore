@@ -34,3 +34,6 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 
 # Ignore all uploaded images
 /assets/uploads/
+
+# Ignore email config
+/application/config/email.php
