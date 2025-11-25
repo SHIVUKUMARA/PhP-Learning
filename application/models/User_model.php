@@ -120,4 +120,13 @@ class User_model extends CI_Model
     {
         $this->db->update('users', ['reset_token' => null, 'token_expiry' => null], ['id' => $user_id]);
     }
+
+    public function clear_expired_tokens()
+    {
+        $this->db->where('token_expiry <', date('Y-m-d H:i:s'));
+        $this->db->update('users', [
+            'reset_token' => null,
+            'token_expiry' => null
+        ]);
+    }
 }

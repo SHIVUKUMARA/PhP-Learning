@@ -106,6 +106,7 @@ class Auth extends CI_Controller
     // Forgot Password page
     public function forgot_password()
     {
+        $this->User_model->clear_expired_tokens();
         $data['body_class'] = 'hold-transition login-page';
         $this->redirect_if_logged_in();
         $this->load->view('auth/forgot_password', $data);
@@ -120,6 +121,7 @@ class Auth extends CI_Controller
 
     public function send_reset_link()
     {
+        $this->User_model->clear_expired_tokens();
         $email = $this->input->post('email', true);
 
         if (!$email) {

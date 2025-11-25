@@ -8,6 +8,11 @@
                     <i class="bi bi-list"></i>
                 </a>
             </li>
+            <li class="nav-item d-none d-md-block">
+                <a href="javascript:void(0);" onclick="history.back();" class="nav-link">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </li>
             <li class="nav-item d-none d-md-block"><a href="<?= base_url('greet') ?>" class="nav-link">Home</a></li>
             <li class="nav-item d-none d-md-block"><a href="#" class="nav-link">Contact</a></li>
         </ul>

@@ -8,6 +8,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property CI_Form_validation $form_validation
  * @property CI_Pagination $pagination
  * @property CI_Uri $uri
+ * @property CI_Output $output
  */
 
 class Dashboard extends CI_Controller
@@ -58,6 +59,7 @@ class Dashboard extends CI_Controller
     public function table()
     {
         $user_id = $this->session->userdata('user_id');
+        $this->output->enable_profiler(TRUE);
         $current_role = $this->session->userdata('role');
         $data['user'] = $this->User_model->get_user_by_id($user_id);
 
@@ -108,8 +110,6 @@ class Dashboard extends CI_Controller
 
         $this->load->view('dashboard/table', $data);
     }
-
-
 
     // View user
     public function view_user($id)
