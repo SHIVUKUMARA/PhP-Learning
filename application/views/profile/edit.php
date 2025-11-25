@@ -42,21 +42,21 @@ $this->load->view('partials/header', $data);
                     <?= form_open('profile/update') ?>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="fullname" name="fullname"
-                            placeholder="Full Name" value="<?= set_value('fullname', $user->fullname); ?>" required>
+                            placeholder="Full Name" value="<?= set_value('fullname', ucwords(strtolower($user->fullname))); ?>" required>
                         <label for="fullname">Full Name</label>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col">
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="fname" name="fname"
-                                    placeholder="First Name" value="<?= set_value('fname', $user->fname); ?>">
+                                    placeholder="First Name" value="<?= set_value('fname', ucwords(strtolower($user->fname))); ?>">
                                 <label for="fname">First Name</label>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="lname" name="lname"
-                                    placeholder="Last Name" value="<?= set_value('lname', $user->lname); ?>">
+                                    placeholder="Last Name" value="<?= set_value('lname', ucwords(strtolower($user->lname))); ?>">
                                 <label for="lname">Last Name</label>
                             </div>
                         </div>

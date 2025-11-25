@@ -28,7 +28,7 @@ $this->load->view('partials/header', $data);
                             alt="User Avatar"
                             style="width:120px;height:120px;object-fit:cover;">
                     </div>
-                    <h4 class="mb-3">Hello, <strong><?= $fullname; ?></strong></h4>
+                    <h4 class="mb-3">Hello, <strong><?= ucwords(strtolower($fullname)); ?></strong></h4>
                     <p class="text-muted">You have successfully logged in.</p>
 
                     <a href="<?= site_url('dashboard/dashboard'); ?>"

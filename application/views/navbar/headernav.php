@@ -134,7 +134,7 @@
                     <img src="<?= $user->avatar_url ?? base_url('assets/uploads/user_default.png'); ?>"
                         class="user-image rounded-circle shadow"
                         alt="User Image" />
-                    <span class="d-none d-md-inline"><?= htmlspecialchars($user->fullname); ?></span>
+                    <span class="d-none d-md-inline"><?= htmlspecialchars(ucwords(strtolower($user->fullname))); ?></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                     <li class="user-header text-bg-primary">
@@ -142,7 +142,7 @@
                             class="rounded-circle shadow"
                             alt="User Image" />
                         <p>
-                            <?= htmlspecialchars($user->fullname); ?> - Web Developer
+                            <?= htmlspecialchars(ucwords(strtolower($user->fullname))); ?> - Web Developer
                             <small>Member since <?= date('M Y', strtotime($user->created_at ?? 'now')); ?></small>
                         </p>
                     </li>

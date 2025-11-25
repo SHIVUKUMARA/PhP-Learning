@@ -48,7 +48,6 @@ class Profile extends CI_Controller
         }
 
         $data['user'] = $this->User_model->get_user_by_id($user_id);
-        $this->set_avatar_url($data['user']);
 
         $data['can_edit']   = $this->can_access($user_id, 'edit');
         $data['can_delete'] = $this->can_access($user_id, 'delete');

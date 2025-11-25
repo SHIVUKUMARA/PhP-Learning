@@ -10,6 +10,7 @@ $this->load->view('partials/header', $data);
         <!-- Header Nav -->
         <?php $this->load->view('navbar/headernav', ['user' => (object)[
             'fullname' => $this->session->userdata('fullname'),
+            'avatar_url' => $user->avatar_url,
             'created_at' => $this->session->userdata('created_at') ?? date('Y-m-d')
         ]]); ?>
 
@@ -84,8 +85,9 @@ $this->load->view('partials/header', $data);
                         </div>
 
                         <div class="mb-3 text-start">
-                            <label class="form-label fw-bold">Profile Image</label>
-                            <input type="file" name="userfile" class="form-control">
+                            <label for="profileimg" class="form-label fw-bold">Profile Image</label>
+                            <sub class="fw-bold text-danger">(Accepted format : .jpg, .jpeg, .png, .gif)</sub>
+                            <input type="file" name="userfile" accept=".jpg, .jpeg, .png, .gif" class="form-control" id="profileimg">
                         </div>
 
                         <div class="d-flex justify-content-center gap-2 mt-4">
@@ -122,6 +124,22 @@ $this->load->view('partials/header', $data);
         if (file) {
             const img = document.querySelector('.position-relative img');
             img.src = URL.createObjectURL(file);
+        }
+    });
+</script>
+
+<script>
+    const fileInput = document.getElementById('profileimg');
+
+    fileInput.addEventListener('change', function(event) {
+        const file = this.files[0];
+        const maxSize = 5 * 1024 * 1024;
+
+        if (file) {
+            if (file.size > maxSize) {
+                alert('Error: File size should not exceed 5MB.');
+                this.value = '';
+            }
         }
     });
 </script>

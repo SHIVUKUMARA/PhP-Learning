@@ -54,9 +54,10 @@ $this->load->view('partials/header', $data);
                                         <?php foreach ($users as $u): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($u->id); ?></td>
-                                                <td><?= htmlspecialchars($u->fullname); ?></td>
-                                                <td><?= htmlspecialchars($u->fname ?? ''); ?></td>
-                                                <td><?= htmlspecialchars($u->lname ?? ''); ?></td>
+                                                <td><?= htmlspecialchars(ucwords(strtolower($u->fullname))); ?></td>
+                                                <td><?= htmlspecialchars(ucwords(strtolower($u->fname ?? ''))); ?></td>
+                                                <td><?= htmlspecialchars(ucwords(strtolower($u->lname ?? ''))); ?></td>
+
                                                 <td><?= htmlspecialchars($u->email); ?></td>
                                                 <td>
                                                     <div class="form-check form-switch d-inline-block">

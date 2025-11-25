@@ -70,3 +70,5 @@ $route['upload'] = 'upload/index';
 $route['upload/do_upload'] = 'upload/do_upload';
 $route['email'] = 'Email/index';
 $route['auth/reset_password/(:any)'] = 'auth/reset_password/$1';
+$route['interaction'] = 'interaction/index';
+$route['interaction/lang/(:any)'] = 'interaction/set_language/$1';

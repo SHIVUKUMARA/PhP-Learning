@@ -14,6 +14,7 @@ $can_delete = isset($can_delete) ? $can_delete : false;
 
         <?php $this->load->view('navbar/headernav', ['user' => (object)[
             'fullname' => $this->session->userdata('fullname'),
+            'avatar_url' => $user->avatar_url,
             'created_at' => $this->session->userdata('created_at') ?? date('Y-m-d')
         ]]); ?>
 
@@ -33,13 +34,15 @@ $can_delete = isset($can_delete) ? $can_delete : false;
 
                     <div class="card-body mt-4">
                         <h3 class="fw-bold mb-2">
-                            Full Name: <?= htmlspecialchars($user->fullname); ?>
+                            Full Name: <?= htmlspecialchars(ucwords(strtolower($user->fullname))); ?>
                         </h3>
 
-                        <p class="mb-2"><strong>First Name:</strong> <?= htmlspecialchars($user->fname ?? 'Not set'); ?></p>
-                        <p class="mb-2"><strong>Last Name:</strong> <?= htmlspecialchars($user->lname ?? 'Not set'); ?></p>
-                        <p class="mb-2"><strong>Status:</strong> <?= htmlspecialchars($user->status ?? 'active'); ?></p>
+                        <p class="mb-2"><strong>First Name:</strong> <?= htmlspecialchars(ucwords(strtolower($user->fname ?? 'Not set'))); ?></p>
+                        <p class="mb-2"><strong>Last Name:</strong> <?= htmlspecialchars(ucwords(strtolower($user->lname ?? 'Not set'))); ?></p>
+                        <p class="mb-2"><strong>Status:</strong> <?= htmlspecialchars(ucwords(strtolower($user->status ?? 'active'))); ?></p>
+                        <p class="mb-2"><strong>Role:</strong> <?= htmlspecialchars(ucwords(strtolower($user->role))); ?></p>
                         <p class="mb-2"><i class="fas fa-envelope me-2"></i>Email: <?= htmlspecialchars($user->email); ?></p>
+
 
                         <small class="text-muted d-block mb-4">
                             Registered on: <?= date('d M Y H:i A', strtotime($user->created_at ?? 'now')); ?><br>
@@ -50,7 +53,7 @@ $can_delete = isset($can_delete) ? $can_delete : false;
 
                             <?php if ($can_edit): ?>
                                 <a href="<?= site_url('profile/edit/' . $user->id); ?>" class="btn btn-warning btn-lg">
-                                    <i class="fas fa-edit"></i> Edit
+                                    <i class="bi bi-pencil-square"></i> Edit
                                 </a>
                             <?php endif; ?>
 
@@ -58,16 +61,16 @@ $can_delete = isset($can_delete) ? $can_delete : false;
                                 <a href="<?= site_url('profile/delete/' . $user->id); ?>"
                                     class="btn btn-danger btn-lg"
                                     onclick="return confirm('Are you sure?');">
-                                    <i class="fas fa-trash"></i> Delete
+                                    <i class="bi bi-trash"></i> Delete
                                 </a>
                             <?php endif; ?>
+
                             <?php if (!$can_edit && !$can_delete): ?>
                                 <button class="btn btn-secondary btn-lg" onclick="window.history.back();">
-                                    <i class="fas fa-arrow-left"></i> Back
+                                    <i class="bi bi-arrow-left"></i> Back
                                 </button>
                             <?php endif; ?>
                         </div>
-
                     </div>
 
                     <div class="card-footer text-center" style="background-color: #a0ce4b86;">
