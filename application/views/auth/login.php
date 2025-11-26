@@ -12,17 +12,11 @@ $this->load->view('partials/header');
   <div class="card">
     <div class="card-body login-card-body">
 
-      <?php if ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
-      <?php endif; ?>
-
-      <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
-      <?php endif; ?>
+      <div id="ajaxLoginMessage"></div>
 
       <p class="login-box-msg">Sign in to start your session</p>
 
-      <?= form_open('auth/login_submit') ?>
+      <?= form_open('auth/login_submit', ['id' => 'loginForm']) ?>
       <div class="input-group mb-3">
         <input type="email" name="email" class="form-control" placeholder="Email" required />
         <div class="input-group-text"><span class="bi bi-envelope"></span></div>
@@ -71,3 +65,36 @@ $this->load->view('partials/header');
 </div>
 
 <?php $this->load->view('partials/footer'); ?>
+
+<script>
+  $(document).ready(function() {
+    $('#loginForm').on('submit', function(e) {
+      e.preventDefault();
+
+      var formData = $(this).serialize();
+
+      $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function(response) {
+          $('#ajaxLoginMessage').html('');
+
+          if (response.status === 'success') {
+            $('#ajaxLoginMessage').html('<div class="alert alert-success">' + response.message + '</div>');
+
+            setTimeout(function() {
+              window.location.href = response.redirect_url;
+            }, 2000);
+          } else {
+            $('#ajaxLoginMessage').html('<div class="alert alert-danger">' + response.message + '</div>');
+          }
+        },
+        error: function(xhr, status, error) {
+          $('#ajaxLoginMessage').html('<div class="alert alert-danger">Something went wrong. Please try again.</div>');
+        }
+      });
+    });
+  });
+</script>

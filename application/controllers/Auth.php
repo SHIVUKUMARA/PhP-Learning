@@ -5,6 +5,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property User_model $User_model
  * @property CI_Session $session
  * @property CI_Input $input
+ * @property CI_Output $output
  * @property CI_Form_validation $form_validation
  * @property CI_Email $email
  */
@@ -34,8 +35,10 @@ class Auth extends CI_Controller
         $this->form_validation->set_rules('agree_terms', 'Terms', 'required');
 
         if ($this->form_validation->run() === FALSE) {
-            $this->load->view('auth/register');
-            return;
+            $message = validation_errors('<div>', '</div>');
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => $message]));
         }
 
         $data = [
@@ -47,12 +50,16 @@ class Auth extends CI_Controller
         ];
 
         if ($this->User_model->register($data)) {
-            $this->session->set_flashdata('success', 'Registration successful. You can now login.');
-            redirect('auth/login');
+            $message = 'Registration successful. You can now login.';
+            $status = 'success';
         } else {
-            $this->session->set_flashdata('error', 'Something went wrong. Please try again.');
-            redirect('auth/register');
+            $message = 'Something went wrong. Please try again.';
+            $status = 'error';
         }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['status' => $status, 'message' => $message]));
     }
 
     // Login page
@@ -70,8 +77,10 @@ class Auth extends CI_Controller
         $this->form_validation->set_rules('password', 'Password', 'required');
 
         if ($this->form_validation->run() === FALSE) {
-            $this->load->view('auth/login');
-            return;
+            $message = validation_errors('<div>', '</div>');
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['status' => 'error', 'message' => $message]));
         }
 
         $email = $this->input->post('email', true);
@@ -86,14 +95,27 @@ class Auth extends CI_Controller
                 'fullname'  => $user->fullname,
                 'email'     => $user->email,
                 'role'      => $user->role,
+                // 'avatar_url' => $user->avatar_url,
                 'logged_in' => TRUE
             ]);
-            redirect('greet');
+
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'success',
+                    'message' => 'Login successful. Redirecting...',
+                    'redirect_url' => site_url('greet')
+                ]));
         } else {
-            $this->session->set_flashdata('error', 'Invalid email or password.');
-            redirect('auth/login');
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid email or password.'
+                ]));
         }
     }
+
 
     // checking if user already logged-in or not
     private function redirect_if_logged_in()

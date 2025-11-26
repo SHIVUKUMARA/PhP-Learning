@@ -12,17 +12,11 @@ $this->load->view('partials/header');
   <div class="card">
     <div class="card-body register-card-body">
 
-      <?php if ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
-      <?php endif; ?>
-
-      <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
-      <?php endif; ?>
+      <div id="ajaxMessage"></div>
 
       <p class="register-box-msg">Register a new membership</p>
 
-      <?= form_open('auth/register_submit'); ?>
+      <?= form_open('auth/register_submit', ['id' => 'registerForm']); ?>
       <div class="input-group mb-3">
         <input type="text" name="fullname" class="form-control" placeholder="Full Name" required />
         <div class="input-group-text"><span class="bi bi-person"></span></div>
@@ -73,3 +67,33 @@ $this->load->view('partials/header');
 </div>
 
 <?php $this->load->view('partials/footer'); ?>
+
+<script>
+  $(document).ready(function() {
+    $('#registerForm').on('submit', function(e) {
+      e.preventDefault();
+
+      var formData = $(this).serialize();
+
+      $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function(response) {
+          $('#ajaxMessage').html(''); // Clearing previous messages
+
+          if (response.status === 'success') {
+            $('#ajaxMessage').html('<div class="alert alert-success">' + response.message + '</div>');
+            $('#registerForm')[0].reset(); // form reset
+          } else {
+            $('#ajaxMessage').html('<div class="alert alert-danger">' + response.message + '</div>');
+          }
+        },
+        error: function(xhr, status, error) {
+          $('#ajaxMessage').html('<div class="alert alert-danger">Something went wrong. Please try again.</div>');
+        }
+      });
+    });
+  });
+</script>

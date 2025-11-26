@@ -38,8 +38,8 @@ $this->load->view('partials/header', $data);
                                     <tr>
                                         <th>ID</th>
                                         <th>Full Name</th>
-                                        <th>Firstname</th>
-                                        <th>Lastname</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
                                         <th>Email</th>
                                         <th>Status</th>
                                         <th>Role</th>
@@ -53,7 +53,7 @@ $this->load->view('partials/header', $data);
                                         <?php $i = $offset + 1; ?>
                                         <?php foreach ($users as $u): ?>
                                             <tr>
-                                                <td><?= htmlspecialchars($u->id); ?></td>
+                                                <td><?= 'VV ' . sprintf('%04d', $u->id); ?></td>
                                                 <td><?= htmlspecialchars(ucwords(strtolower($u->fullname))); ?></td>
                                                 <td><?= htmlspecialchars(ucwords(strtolower($u->fname ?? ''))); ?></td>
                                                 <td><?= htmlspecialchars(ucwords(strtolower($u->lname ?? ''))); ?></td>
