@@ -6,7 +6,7 @@ $this->load->view('partials/header', $data);
 
 <div class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
     <div class="app-wrapper">
-        <?php $this->load->view('navbar/headernav'); ?>
+        <?php $this->load->view('navbar/headernav', ['user' => $logged_user]); ?>
         <?php $this->load->view('navbar/sidebar'); ?>
 
         <main class="app-main">

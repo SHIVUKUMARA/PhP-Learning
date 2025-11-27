@@ -7,10 +7,7 @@ $this->load->view('partials/header', $data);
 <div class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
     <div class="app-wrapper">
 
-        <?php $this->load->view('navbar/headernav', ['user' => (object)[
-            'fullname' => $this->session->userdata('fullname'),
-            'created_at' => $this->session->userdata('created_at') ?? date('Y-m-d')
-        ]]); ?>
+        <?php $this->load->view('navbar/headernav', ['user' => $user]); ?>
 
         <?php $this->load->view('navbar/sidebar'); ?>
 

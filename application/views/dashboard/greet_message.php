@@ -7,11 +7,7 @@ $this->load->view('partials/header', $data);
 <div class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
     <div class="app-wrapper">
 
-        <?php $this->load->view('navbar/headernav', ['user' => (object)[
-            'avatar_url' => $user->avatar_url,
-            'fullname' => $fullname,
-            'created_at' => $this->session->userdata('created_at') ?? date('Y-m-d')
-        ]]); ?>
+        <?php $this->load->view('navbar/headernav', ['user' => $logged_user]); ?>
 
         <?php $this->load->view('navbar/sidebar'); ?>
 
@@ -23,7 +19,7 @@ $this->load->view('partials/header', $data);
                 </div>
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        <img src="<?= $user->avatar_url ?>"
+                        <img src="<?= $logged_user->avatar_url ?>"
                             class="user-image rounded-circle shadow"
                             alt="User Avatar"
                             style="width:120px;height:120px;object-fit:cover;">

@@ -19,6 +19,12 @@ class Dashboard extends CI_Controller
         parent::__construct();
         $this->load->model('User_model');
         $this->load->library('pagination');
+
+        if ($this->session->userdata('user_id')) {
+            $logged_user = $this->User_model->get_user_by_id($this->session->userdata('user_id'));
+            $this->set_avatar_url($logged_user);
+            $this->load->vars(['logged_user' => $logged_user]);
+        }
     }
 
     private function can_access_user_action($target_user_id, $action = 'view')
@@ -206,5 +212,13 @@ class Dashboard extends CI_Controller
         }
 
         $this->load->view('profile/create', $data);
+    }
+
+    private function set_avatar_url(&$user)
+    {
+        $upload_dir = FCPATH . 'assets/uploads/';
+        $user->avatar_url = (!empty($user->avatar) && file_exists($upload_dir . $user->avatar))
+            ? base_url('assets/uploads/' . $user->avatar)
+            : base_url('assets/uploads/user_default.png');
     }
 }

@@ -8,11 +8,7 @@ $this->load->view('partials/header', $data);
     <div class="app-wrapper">
 
         <!-- Header Nav -->
-        <?php $this->load->view('navbar/headernav', ['user' => (object)[
-            'fullname' => $this->session->userdata('fullname'),
-            'avatar_url' => $user->avatar_url,
-            'created_at' => $this->session->userdata('created_at') ?? date('Y-m-d')
-        ]]); ?>
+        <?php $this->load->view('navbar/headernav', ['user' => $user]); ?>
 
         <!-- Sidebar -->
         <?php $this->load->view('navbar/sidebar'); ?>
