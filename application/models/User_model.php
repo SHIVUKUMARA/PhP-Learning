@@ -129,4 +129,24 @@ class User_model extends CI_Model
             'token_expiry' => null
         ]);
     }
+
+    // Count users by role
+    public function count_users_by_role($role)
+    {
+        return $this->db->where('role', $role)
+            ->count_all_results('users');
+    }
+
+    public function get_users_by_role($role, $limit, $offset)
+    {
+        $this->db->where('role', $role)
+            ->order_by('id', 'ASC')
+            ->limit($limit, $offset);
+        $query = $this->db->get('users');
+        $users = $query->result();
+        foreach ($users as $user) {
+            $this->set_avatar_url($user);
+        }
+        return $users;
+    }
 }

@@ -13,9 +13,22 @@ $this->load->view('partials/header', $data);
             <div class="app-content-header">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-sm-6">
-                            <h3 class="mb-0">Users Information</h3>
-                        </div>
+                        <?php if ($this->session->userdata('role') === 'admin'): ?>
+                            <div class="col-sm-6 d-flex align-items-center">
+                                <label for="roleFilter" class="me-2 mb-0 fw-bold">List View</label>
+                                <select class="form-select w-auto" id="roleFilter" name="roleFilter" style="min-width:150px;">
+                                    <option value="" <?= $roleFilter == '' ? 'selected' : '' ?>>All Records</option>
+                                    <option value="admin" <?= $roleFilter == 'admin' ? 'selected' : '' ?>>Admin Records</option>
+                                    <option value="manager" <?= $roleFilter == 'manager' ? 'selected' : '' ?>>Manager Records</option>
+                                    <option value="customer" <?= $roleFilter == 'customer' ? 'selected' : '' ?>>Customer Records</option>
+                                </select>
+                            </div>
+                        <?php else: ?>
+                            <div class="col-sm-6 d-flex align-items-center">
+                                <h3 class="mb-0 fw-bold">Users Information</h3>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-end">
                                 <li class="breadcrumb-item"><a href="<?= base_url('greet'); ?>">Home</a></li>
@@ -43,6 +56,8 @@ $this->load->view('partials/header', $data);
                                         <th>Email</th>
                                         <th>Status</th>
                                         <th>Role</th>
+                                        <th>Country</th>
+                                        <th>Ph No.</th>
                                         <th>Registered on</th>
                                         <th>Updated on</th>
                                         <th>Actions</th>
@@ -65,6 +80,8 @@ $this->load->view('partials/header', $data);
                                                     </div>
                                                 </td>
                                                 <td><?= htmlspecialchars(ucfirst($u->role)); ?></td>
+                                                <td><?= htmlspecialchars($u->country_code ?? 'NA') ?></td>
+                                                <td><?= htmlspecialchars(format_phone($u->phone_number ?? 'NA')) ?></td>
                                                 <td><?= date('M d, Y - h:i A', strtotime($u->created_at)); ?></td>
                                                 <td><?= date('M d, Y - h:i A', strtotime($u->last_updated)); ?></td>
                                                 <td>
@@ -110,5 +127,25 @@ $this->load->view('partials/header', $data);
 
     </div>
 </div>
+<?php
+function format_phone($number)
+{
+    $digits = preg_replace('/\D/', '', $number);
+    if (strlen($digits) === 10) {
+        return preg_replace('/(\d{3})(\d{3})(\d{4})/', '$1-$2-$3', $digits);
+    }
+    return $number;
+}
+?>
+
 
 <?php $this->load->view('partials/footer'); ?>
+
+<script>
+    $('#roleFilter').on('change', function() {
+        const role = $(this).val();
+        let url = '<?= base_url("dashboard/users"); ?>';
+        if (role) url += '?role=' + role;
+        window.location.href = url;
+    });
+</script>

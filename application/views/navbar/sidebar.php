@@ -24,8 +24,8 @@ $segment3 = $this->uri->segment(3);
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($segment2 == 'table') ? 'menu-open' : '' ?>">
-                    <a href="#" class="nav-link <?= ($segment2 == 'table') ? 'active' : '' ?>">
+                <li class="nav-item <?= ($segment2 == 'table' || $segment2 == 'api_table') ? 'menu-open' : '' ?>">
+                    <a href="#" class="nav-link <?= ($segment2 == 'table' || $segment2 == 'api_table') ? 'active' : '' ?>">
                         <i class="nav-icon bi bi-table"></i>
                         <p>Tables <i class="nav-arrow bi bi-chevron-right"></i></p>
                     </a>
@@ -35,6 +35,13 @@ $segment3 = $this->uri->segment(3);
                                 class="nav-link <?= ($segment2 == 'table') ? 'active' : '' ?>">
                                 <i class="nav-icon bi bi-circle"></i>
                                 <p>Users Table</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url('dashboard/api_table') ?>"
+                                class="nav-link <?= ($segment2 == 'api_table') ? 'active' : '' ?>">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>API Table</p>
                             </a>
                         </li>
                     </ul>

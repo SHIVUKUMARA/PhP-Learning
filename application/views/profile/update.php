@@ -75,18 +75,23 @@ $this->load->view('partials/header', $data);
                             <label for="role">Role</label>
                         </div>
 
+                        <div class="form-floating mb-3">
+                            <input type="tel" class="form-control" id="phone" name="phone"
+                                placeholder="Enter phone number" maxlength="12" value="<?= set_value('phone', $user->phone_number); ?>" required>
+                        </div>
+
                         <div class="mb-3 text-start">
                             <label for="profileimg" class="form-label fw-bold">Profile Image</label>
-                            <sub class="fw-bold text-danger">(Accepted format : .jpg, .jpeg, .png, .gif)</sub>
+                            <sub class="fw-bold text-danger">(Accepted format: .jpg, .jpeg, .png, .gif)</sub>
                             <input type="file" name="userfile" accept=".jpg, .jpeg, .png, .gif" class="form-control" id="profileimg">
                         </div>
 
                         <div class="d-flex justify-content-center gap-2 mt-4">
                             <button type="submit" class="btn btn-success btn-lg shadow-sm">
-                                <i class="fas fa-save me-1"></i> Save Changes
+                                <i class="bi bi-save me-1"></i> Save Changes
                             </button>
                             <a href="<?= site_url('dashboard/table'); ?>" class="btn btn-danger btn-lg shadow-sm">
-                                <i class="fas fa-times me-1"></i> Cancel
+                                <i class="bi bi-x-lg me-1"></i> Cancel
                             </a>
                         </div>
 
@@ -109,61 +114,93 @@ $this->load->view('partials/header', $data);
 
 <?php $this->load->view('partials/footer'); ?>
 
-<script>
-    document.querySelector('input[name="userfile"]').addEventListener('change', function(event) {
-        const [file] = event.target.files;
-        if (file) {
-            const img = document.querySelector('.position-relative img');
-            img.src = URL.createObjectURL(file);
-        }
-    });
-</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
 
 <script>
-    const fileInput = document.getElementById('profileimg');
+    document.addEventListener("DOMContentLoaded", function() {
 
-    fileInput.addEventListener('change', function(event) {
-        const file = this.files[0];
-        const maxSize = 5 * 1024 * 1024;
+        const profileImgInput = document.querySelector('#profileimg');
+        profileImgInput.addEventListener('change', function() {
+            const [file] = this.files;
+            if (file) {
+                const img = document.querySelector('.position-relative img');
+                img.src = URL.createObjectURL(file);
+            }
+        });
 
-        if (file) {
-            if (file.size > maxSize) {
+        profileImgInput.addEventListener('change', function() {
+            const file = this.files[0];
+            const maxSize = 5 * 1024 * 1024;
+            if (file && file.size > maxSize) {
                 alert('Error: File size should not exceed 5MB.');
                 this.value = '';
             }
-        }
-    });
-</script>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $('#profileForm').on('submit', function(e) {
-        e.preventDefault();
-
-        var form = $(this)[0];
-        var formData = new FormData(form);
-
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
-
-                    if (response.user.avatar_url) {
-                        $('img.position-relative').attr('src', response.user.avatar_url);
-                    }
-                } else {
-                    $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
-                }
-            },
-            error: function() {
-                $('#msg').html('<div class="alert alert-danger">Something went wrong!</div>');
-            }
         });
+
+        const phoneInput = document.querySelector("#phone");
+        const iti = window.intlTelInput(phoneInput, {
+            initialCountry: "in",
+            separateDialCode: true,
+            preferredCountries: ["in", "us"]
+        });
+
+        function formatPhone(value) {
+            value = value.replace(/\D/g, '').substring(0, 10);
+            if (value.length > 6) {
+                return value.replace(/(\d{3})(\d{3})(\d{0,4})/, "$1-$2-$3");
+            } else if (value.length > 3) {
+                return value.replace(/(\d{3})(\d{0,3})/, "$1-$2");
+            } else {
+                return value;
+            }
+        }
+
+        phoneInput.value = formatPhone(phoneInput.value);
+
+        phoneInput.addEventListener('input', function() {
+            const cursorPos = phoneInput.selectionStart;
+            phoneInput.value = formatPhone(phoneInput.value);
+            phoneInput.setSelectionRange(cursorPos, cursorPos);
+        });
+
+        $('#profileForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var form = $(this)[0];
+            var formData = new FormData(form);
+
+            const countryData = iti.getSelectedCountryData();
+            const nationalNumber = phoneInput.value.replace(/\D/g, '');
+
+            formData.set('country_code', "+" + countryData.dialCode);
+            formData.set('phone_number', nationalNumber);
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
+
+                        if (response.user.avatar_url) {
+                            $('img.position-relative').attr('src', response.user.avatar_url);
+                        }
+                    } else {
+                        $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                },
+                error: function() {
+                    $('#msg').html('<div class="alert alert-danger">Something went wrong!</div>');
+                }
+            });
+        });
+
     });
 </script>

@@ -15,6 +15,8 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="<?= base_url('assets/css/bootstrap-icons.min.css'); ?>">
 
+    <link rel="stylesheet" href="<?= base_url('assets/css/intlTelInput.min.css'); ?>">
+
     <link rel="stylesheet" href="<?= base_url('assets/css/index.css'); ?>">
 
     <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">

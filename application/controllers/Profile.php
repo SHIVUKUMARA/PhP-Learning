@@ -97,6 +97,8 @@ class Profile extends MY_Controller
             'fname'    => $this->input->post('fname', TRUE),
             'lname'    => $this->input->post('lname', TRUE),
             'status'   => $this->input->post('status', TRUE),
+            'phone_number'  => $this->input->post('phone_number', TRUE),
+            'country_code'  => $this->input->post('country_code', TRUE),
         ];
 
         $current_role = $this->session->userdata('role');

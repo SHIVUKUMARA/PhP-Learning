@@ -64,6 +64,7 @@ class Dashboard extends CI_Controller
     // Users table with pagination
     public function table()
     {
+        $roleFilter = $this->input->get('role', TRUE) ?: '';
         $user_id = $this->session->userdata('user_id');
         $this->output->enable_profiler(TRUE);
         $current_role = $this->session->userdata('role');
@@ -101,6 +102,12 @@ class Dashboard extends CI_Controller
         $page_number = ($page_number && ctype_digit($page_number)) ? (int)$page_number : 1;
         $offset = ($page_number - 1) * $config['per_page'];
 
+        if ($roleFilter) {
+            $users = $this->User_model->get_users_by_role($roleFilter, $config['per_page'], $offset);
+        } else {
+            $users = $this->User_model->get_users($config['per_page'], $offset);
+        }
+
         $users = $this->User_model->get_users($config['per_page'], $offset);
 
         foreach ($users as &$u) {
@@ -112,6 +119,7 @@ class Dashboard extends CI_Controller
         $data['users'] = $users;
         $data['offset'] = $offset;
         $data['current_page'] = $page_number;
+        $data['roleFilter'] = $roleFilter;
         $data['total_rows'] = $config['total_rows'];
 
         $this->load->view('dashboard/table', $data);
@@ -212,6 +220,78 @@ class Dashboard extends CI_Controller
         }
 
         $this->load->view('profile/create', $data);
+    }
+
+    public function users()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('auth/login');
+        }
+
+        if ($this->session->userdata('role') !== 'admin') {
+            show_error('You do not have permission to access this page.', 403);
+        }
+
+        $roleFilter = $this->input->get('role', TRUE);
+
+        $config['base_url'] = base_url('dashboard/users');
+        $config['per_page'] = 10;
+        $config['use_page_numbers'] = TRUE;
+
+        if ($roleFilter) {
+            $config['total_rows'] = $this->User_model->count_users_by_role($roleFilter);
+        } else {
+            $config['total_rows'] = $this->User_model->get_total_users();
+        }
+
+        // Bootstrap 5 pagination styling
+        $config['full_tag_open'] = '<nav><ul class="pagination justify-content-center">';
+        $config['full_tag_close'] = '</ul></nav>';
+        $config['first_link'] = 'First';
+        $config['last_link'] = 'Last';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['prev_link'] = '&laquo';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_link'] = '&raquo';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
+        $config['cur_tag_close'] = '</span></li>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['attributes'] = ['class' => 'page-link'];
+
+        $this->pagination->initialize($config);
+
+        $page_number = $this->input->get('per_page', TRUE);
+        $page_number = (isset($page_number) && ctype_digit($page_number)) ? (int)$page_number : 1;
+        $offset = ($page_number - 1) * $config['per_page'];
+
+        if ($roleFilter) {
+            $users = $this->User_model->get_users_by_role($roleFilter, $config['per_page'], $offset);
+        } else {
+            $users = $this->User_model->get_users($config['per_page'], $offset);
+        }
+
+        foreach ($users as &$u) {
+            $u->can_view = true;
+            $u->can_edit = true;
+            $u->can_delete = true;
+        }
+
+        $data = [
+            'users' => $users,
+            'offset' => $offset,
+            'current_page' => $page_number,
+            'roleFilter' => $roleFilter,
+            'total_rows' => $config['total_rows']
+        ];
+
+        $this->load->view('dashboard/table', $data);
     }
 
     private function set_avatar_url(&$user)
