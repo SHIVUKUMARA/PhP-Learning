@@ -24,14 +24,9 @@ $this->load->view('partials/header', $data);
 
                     <div class="card-body p-4">
 
-                        <?php if ($this->session->flashdata('success')): ?>
-                            <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
-                        <?php endif; ?>
-                        <?php if ($this->session->flashdata('error')): ?>
-                            <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
-                        <?php endif; ?>
+                        <div id="msg"></div>
 
-                        <?= form_open_multipart('profile/update') ?>
+                        <?= form_open_multipart('profile/update', ['id' => 'profileForm']) ?>
                         <input type="hidden" name="user_id" value="<?= $user->id ?>">
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="fullname" name="fullname"
@@ -137,5 +132,38 @@ $this->load->view('partials/header', $data);
                 this.value = '';
             }
         }
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $('#profileForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var form = $(this)[0];
+        var formData = new FormData(form);
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
+
+                    if (response.user.avatar_url) {
+                        $('img.position-relative').attr('src', response.user.avatar_url);
+                    }
+                } else {
+                    $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+            },
+            error: function() {
+                $('#msg').html('<div class="alert alert-danger">Something went wrong!</div>');
+            }
+        });
     });
 </script>

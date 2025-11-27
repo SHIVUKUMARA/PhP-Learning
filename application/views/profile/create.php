@@ -32,7 +32,7 @@ $this->load->view('partials/header', $data);
                             <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
                         <?php endif; ?>
 
-                        <?= form_open('dashboard/create_admin'); ?>
+                        <?= form_open('dashboard/create_users'); ?>
                         <div class="form-floating mb-2">
                             <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" required autocomplete="off">
                             <label for="fullname">Full Name</label>

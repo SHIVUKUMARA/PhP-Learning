@@ -53,7 +53,7 @@ $this->load->view('partials/header', $data);
                                         <?php $i = $offset + 1; ?>
                                         <?php foreach ($users as $u): ?>
                                             <tr>
-                                                <td><?= 'VV ' . sprintf('%04d', $u->id); ?></td>
+                                                <td><?= 'VV-' . sprintf('%04d', $u->id); ?></td>
                                                 <td><?= htmlspecialchars(ucwords(strtolower($u->fullname))); ?></td>
                                                 <td><?= htmlspecialchars(ucwords(strtolower($u->fname ?? ''))); ?></td>
                                                 <td><?= htmlspecialchars(ucwords(strtolower($u->lname ?? ''))); ?></td>

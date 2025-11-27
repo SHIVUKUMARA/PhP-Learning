@@ -161,7 +161,7 @@ class Dashboard extends CI_Controller
         redirect('dashboard/table');
     }
 
-    public function create_admin()
+    public function create_users()
     {
         if (!$this->session->userdata('logged_in')) {
             redirect('auth/login');

@@ -18,7 +18,7 @@ $this->load->view('partials/header', $data);
                         </div>
                         <div class="col-md-6 text-end">
                             <?php if ($current_role === 'admin'): ?>
-                                <?= form_open('dashboard/create_admin'); ?>
+                                <?= form_open('dashboard/create_users'); ?>
                                 <button type="submit" class="btn btn-primary" name="save" value="create">
                                     <i class="bi bi-person-plus me-1"></i>
                                     Create Users

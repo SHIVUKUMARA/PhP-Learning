@@ -81,45 +81,43 @@ class Profile extends MY_Controller
 
     public function update()
     {
+        if (!$this->input->is_ajax_request()) {
+            show_error('No direct access allowed', 403);
+        }
+
         $editing_user = $this->input->post('user_id');
 
         if (!$this->can_access($editing_user, 'edit')) {
-            show_error('Access Denied', 403);
+            echo json_encode(['status' => 'error', 'message' => 'Access Denied']);
+            return;
         }
 
         $data = [
-            'fullname' => $this->input->post('fullname'),
-            'fname'    => $this->input->post('fname'),
-            'lname'    => $this->input->post('lname'),
-            'status'   => $this->input->post('status'),
+            'fullname' => $this->input->post('fullname', TRUE),
+            'fname'    => $this->input->post('fname', TRUE),
+            'lname'    => $this->input->post('lname', TRUE),
+            'status'   => $this->input->post('status', TRUE),
         ];
 
-        // Only admin can update role
         $current_role = $this->session->userdata('role');
         if ($current_role === 'admin' && $this->input->post('role')) {
-            $data['role'] = $this->input->post('role');
+            $data['role'] = $this->input->post('role', TRUE);
         }
 
         if (!empty($_FILES['userfile']['name'])) {
-
             $upload_path = realpath(APPPATH . '../assets/uploads');
-
-            if (!$upload_path) {
-                show_error('Upload directory not found');
-            }
-
-            $config['upload_path']   = $upload_path;
-            $config['allowed_types'] = 'jpg|jpeg|png|gif';
-            $config['max_size']      = 5120;
-            $config['encrypt_name']  = TRUE;
+            $config = [
+                'upload_path'   => $upload_path,
+                'allowed_types' => 'jpg|jpeg|png|gif',
+                'max_size'      => 5120,
+                'encrypt_name'  => TRUE
+            ];
 
             $this->load->library('upload');
             $this->upload->initialize($config);
 
             if (!$this->upload->do_upload('userfile')) {
-                $error = $this->upload->display_errors();
-                $this->session->set_flashdata('error', $error);
-                redirect('profile/update/' . $editing_user);
+                echo json_encode(['status' => 'error', 'message' => $this->upload->display_errors()]);
                 return;
             }
 
@@ -133,7 +131,22 @@ class Profile extends MY_Controller
         }
 
         $this->User_model->update_user($editing_user, $data);
-        redirect('profile/profile/' . $editing_user);
+
+        $updated_user = $this->User_model->get_user_by_id($editing_user);
+        $this->set_avatar_url($updated_user);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Profile updated successfully!',
+            'user' => [
+                'fullname'   => $updated_user->fullname,
+                'fname'      => $updated_user->fname,
+                'lname'      => $updated_user->lname,
+                'status'     => $updated_user->status,
+                'role'       => $updated_user->role,
+                'avatar_url' => $updated_user->avatar_url
+            ]
+        ]);
     }
 
     public function delete($user_id = null)

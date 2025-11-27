@@ -13,21 +13,22 @@ class Interaction extends CI_Controller
         parent::__construct();
         $this->load->library('session');
         $this->load->helper('url');
-        $this->load->model('User_model'); // Load your User model
+        $this->load->model('User_model');
+        
         $lang = $this->session->userdata('lang') ?? 'english';
         $this->lang->load('messages', $lang);
     }
 
     public function index()
     {
-        $user_id = $this->session->userdata('user_id'); // Or whatever session key you use
+        $user_id = $this->session->userdata('user_id');
         $user = $this->User_model->get_user_by_id($user_id);
 
         $data = [
             'welcome' => $this->lang->line('welcome'),
             'description' => $this->lang->line('description'),
             'select_language' => $this->lang->line('select_language'),
-            'user' => $user // Pass full user object
+            'user' => $user 
         ];
 
         $this->load->view('language/interaction', $data);
