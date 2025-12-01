@@ -70,84 +70,101 @@ $this->load->view('partials/header', ['title' => 'API Users Table']);
 <?php $this->load->view('partials/footer'); ?>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const tableBody = document.getElementById('usersTableBody');
-        const pagination = document.getElementById('pagination');
+    $(document).ready(function() {
+
+        const tableBody = $('#usersTableBody');
+        const pagination = $('#pagination');
         const perPage = 50;
         let currentPage = 1;
         let users = [];
 
-        function renderTable(page) {
-            tableBody.innerHTML = '';
-            const start = (page - 1) * perPage;
-            const end = start + perPage;
-            const pagedUsers = users.slice(start, end);
+        function loadUsers() {
+            $.ajax({
+                url: "https://dummyjson.com/users?limit=250",
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    users = data.users || [];
+                    render();
+                },
+                error: function() {
+                    tableBody.html('<tr><td colspan="9" class="text-center text-danger">Failed to load users.</td></tr>');
+                }
+            });
+        }
 
-            if (pagedUsers.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="9" class="text-center">No users found.</td></tr>';
+        function render() {
+            renderTable();
+            renderPagination();
+        }
+
+        function renderTable() {
+            tableBody.html('');
+
+            const start = (currentPage - 1) * perPage;
+            const pageUsers = users.slice(start, start + perPage);
+
+            if (!pageUsers.length) {
+                tableBody.html('<tr><td colspan="9" class="text-center">No users found.</td></tr>');
                 return;
             }
 
-            pagedUsers.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                <td>${user.id}</td>
-                <td>${user.firstName}</td>
-                <td>${user.lastName}</td>
-                <td>${user.age}</td>
-                <td>${capitalize(user.gender)}</td>
-                <td>${user.email}</td>
-                <td>${formatPhone(user.phone)}</td>
-                <td>${user.birthDate}</td>
-                <td>${user.role || 'N/A'}</td>
-            `;
-                tableBody.appendChild(row);
+            $.each(pageUsers, function(i, u) {
+                tableBody.append(`
+                    <tr>
+                        <td>${u.id}</td>
+                        <td>${u.firstName}</td>
+                        <td>${u.lastName}</td>
+                        <td>${u.age}</td>
+                        <td>${capitalize(u.gender)}</td>
+                        <td>${u.email}</td>
+                        <td>${formatPhone(u.phone)}</td>
+                        <td>${u.birthDate}</td>
+                        <td>${u.role || 'N/A'}</td>
+                    </tr>
+                `);
             });
-
-            renderPagination(page);
         }
 
-        function renderPagination(page) {
-            pagination.innerHTML = '';
+        function renderPagination() {
             const totalPages = Math.ceil(users.length / perPage);
 
-            const createPageItem = (p, text = p, active = false) => {
-                const li = document.createElement('li');
-                li.className = 'page-item' + (active ? ' active' : '');
-                li.innerHTML = `<a class="page-link" href="#">${text}</a>`;
-                li.addEventListener('click', e => {
-                    e.preventDefault();
-                    currentPage = p;
-                    renderTable(currentPage);
-                });
-                return li;
-            };
+            let html = '';
 
-            if (page > 1) pagination.appendChild(createPageItem(page - 1, '«'));
-            for (let i = 1; i <= totalPages; i++) {
-                pagination.appendChild(createPageItem(i, i, i === page));
+            if (currentPage > 1) {
+                html += `<li class="page-item"><a href="#" class="page-link" id="prev">«</a></li>`;
             }
-            if (page < totalPages) pagination.appendChild(createPageItem(page + 1, '»'));
+
+            html += `<li class="page-item active"><span class="page-link">${currentPage}</span></li>`;
+
+            if (currentPage < totalPages) {
+                html += `<li class="page-item"><a href="#" class="page-link" id="next">»</a></li>`;
+            }
+
+            pagination.html(html);
+
+            $('#prev').click(function(e) {
+                e.preventDefault();
+                currentPage--;
+                render();
+            });
+
+            $('#next').click(function(e) {
+                e.preventDefault();
+                currentPage++;
+                render();
+            });
         }
 
         function formatPhone(phone) {
-            const digits = phone.replace(/\D/g, '');
-            return digits.length === 10 ? digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3') : phone;
+            const d = phone.replace(/\D/g, '');
+            return d.length === 10 ? d.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3') : phone;
         }
 
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
+        function capitalize(t) {
+            return t.charAt(0).toUpperCase() + t.slice(1);
         }
 
-        fetch('https://dummyjson.com/users?limit=250')
-            .then(res => res.json())
-            .then(data => {
-                users = data.users || [];
-                renderTable(currentPage);
-            })
-            .catch(err => {
-                tableBody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">Failed to load users.</td></tr>';
-                console.error(err);
-            });
+        loadUsers();
     });
 </script>
