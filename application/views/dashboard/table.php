@@ -49,17 +49,32 @@ $this->load->view('partials/header', $data);
                             <table class="table table-striped table-hover align-middle text-center table-bordered" style="min-width:1200px; white-space: nowrap;">
                                 <thead class="table-light sticky-top">
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Full Name</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                        <th>Role</th>
-                                        <th>Country</th>
-                                        <th>Ph No.</th>
-                                        <th>Registered on</th>
-                                        <th>Updated on</th>
+                                        <?php
+                                        $columns = [
+                                            ['field' => 'id', 'label' => 'ID'],
+                                            ['field' => 'fullname', 'label' => 'Full Name'],
+                                            ['field' => 'fname', 'label' => 'First Name'],
+                                            ['field' => 'lname', 'label' => 'Last Name'],
+                                            ['field' => 'email', 'label' => 'Email'],
+                                            ['field' => 'status', 'label' => 'Status'],
+                                            ['field' => 'role', 'label' => 'Role'],
+                                            ['field' => 'country_code', 'label' => 'Country'],
+                                            ['field' => 'phone_number', 'label' => 'Ph No.'],
+                                            ['field' => 'created_at', 'label' => 'Registered on'],
+                                            ['field' => 'last_updated', 'label' => 'Updated on'],
+                                        ];
+                                        foreach ($columns as $col): ?>
+                                            <th>
+                                                <?= $col['label'] ?>
+                                                <?php $this->load->view('dashboard/filter', [
+                                                    'field_name' => $col['field'],
+                                                    'label' => $col['label'],
+                                                    'search_value' => $search_column == $col['field'] ? $search_value : '',
+                                                    'search_operator' => $search_column == $col['field'] ? $search_operator : ''
+                                                ]); ?>
+                                            </th>
+                                        <?php endforeach; ?>
+
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -106,7 +121,7 @@ $this->load->view('partials/header', $data);
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="10" class="text-center">No users found.</td>
+                                            <td colspan="10" class="text-center">The Searched Data Didn't found</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -145,5 +160,31 @@ function format_phone($number)
         let url = '<?= base_url("dashboard/users"); ?>';
         if (role) url += '?role=' + role;
         window.location.href = url;
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('.column-search-form').on('submit', function(e) {
+            e.preventDefault();
+            const column = $(this).data('column');
+            const operator = $(this).find('select[name="operator"]').val();
+            const value = $(this).find('input[name="value"]').val().trim();
+
+            if (!value) {
+                alert('Please enter a value to search.');
+                return;
+            }
+
+            let url = '<?= base_url("dashboard/table") ?>';
+            url += `?search_column=${column}&search_operator=${operator}&search_value=${encodeURIComponent(value)}`;
+
+            const roleFilter = $('#roleFilter').val();
+            if (roleFilter) {
+                url += `&role=${roleFilter}`;
+            }
+
+            window.location.href = url;
+        });
     });
 </script>

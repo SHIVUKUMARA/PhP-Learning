@@ -64,18 +64,29 @@ class Dashboard extends CI_Controller
     // Users table with pagination
     public function table()
     {
-        $roleFilter = $this->input->get('role', TRUE) ?: '';
-        $user_id = $this->session->userdata('user_id');
-        $this->output->enable_profiler(TRUE);
-        $current_role = $this->session->userdata('role');
-        $data['user'] = $this->User_model->get_user_by_id($user_id);
+        $roleFilter      = $this->input->get('role', TRUE) ?: '';
+        $search_column   = $this->input->get('search_column', TRUE);
+        $search_operator = $this->input->get('search_operator', TRUE);
+        $search_value    = $this->input->get('search_value', TRUE);
 
-        $config['base_url'] = base_url('dashboard/table');
-        $config['total_rows'] = $this->User_model->get_total_users();
-        $config['per_page'] = 10;
+        $user_id         = $this->session->userdata('user_id');
+        $current_role    = $this->session->userdata('role');
+        $data['user']    = $this->User_model->get_user_by_id($user_id);
+
+        $config['base_url']    = base_url('dashboard/table');
+        $config['per_page']    = 10;
         $config['use_page_numbers'] = TRUE;
 
-        // Pagination config (Bootstrap 5)
+        // Count total rows based on search or role filter
+        if ($search_column && $search_operator && $search_value) {
+            $config['total_rows'] = $this->User_model->count_search_users($search_column, $search_operator, $search_value);
+        } elseif ($roleFilter) {
+            $config['total_rows'] = $this->User_model->count_users_by_role($roleFilter);
+        } else {
+            $config['total_rows'] = $this->User_model->get_total_users();
+        }
+
+        // Pagination Bootstrap 5 setup
         $config['full_tag_open'] = '<nav><ul class="pagination justify-content-center">';
         $config['full_tag_close'] = '</ul></nav>';
         $config['first_link'] = 'First';
@@ -102,13 +113,13 @@ class Dashboard extends CI_Controller
         $page_number = ($page_number && ctype_digit($page_number)) ? (int)$page_number : 1;
         $offset = ($page_number - 1) * $config['per_page'];
 
-        if ($roleFilter) {
+        if ($search_column && $search_operator && $search_value) {
+            $users = $this->User_model->search_users($search_column, $search_operator, $search_value, $config['per_page'], $offset);
+        } elseif ($roleFilter) {
             $users = $this->User_model->get_users_by_role($roleFilter, $config['per_page'], $offset);
         } else {
             $users = $this->User_model->get_users($config['per_page'], $offset);
         }
-
-        $users = $this->User_model->get_users($config['per_page'], $offset);
 
         foreach ($users as &$u) {
             $u->can_view = $this->can_access_user_action($u->id, 'view');
@@ -116,14 +127,18 @@ class Dashboard extends CI_Controller
             $u->can_delete = $this->can_access_user_action($u->id, 'delete');
         }
 
-        $data['users'] = $users;
-        $data['offset'] = $offset;
-        $data['current_page'] = $page_number;
-        $data['roleFilter'] = $roleFilter;
-        $data['total_rows'] = $config['total_rows'];
+        $data['users']         = $users;
+        $data['offset']        = $offset;
+        $data['current_page']  = $page_number;
+        $data['roleFilter']    = $roleFilter;
+        $data['search_column'] = $search_column;
+        $data['search_operator'] = $search_operator;
+        $data['search_value']  = $search_value;
+        $data['total_rows']    = $config['total_rows'];
 
         $this->load->view('dashboard/table', $data);
     }
+
 
     // View user
     public function view_user($id)

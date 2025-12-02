@@ -149,4 +149,47 @@ class User_model extends CI_Model
         }
         return $users;
     }
+
+    public function search_users($column, $operator, $value, $limit, $offset)
+    {
+        $this->db->limit($limit, $offset);
+
+        switch ($operator) {
+            case 'equals':
+                $this->db->where($column, $value);
+                break;
+            case 'not_equals':
+                $this->db->where("$column !=", $value);
+                break;
+            case 'contains':
+                $this->db->like($column, $value);
+                break;
+            default:
+                $this->db->like($column, $value);
+                break;
+        }
+
+        $query = $this->db->get('users');
+        return $query->result();
+    }
+
+    public function count_search_users($column, $operator, $value)
+    {
+        switch ($operator) {
+            case 'equals':
+                $this->db->where($column, $value);
+                break;
+            case 'not_equals':
+                $this->db->where("$column !=", $value);
+                break;
+            case 'contains':
+                $this->db->like($column, $value);
+                break;
+            default:
+                $this->db->like($column, $value);
+                break;
+        }
+
+        return $this->db->count_all_results('users');
+    }
 }
