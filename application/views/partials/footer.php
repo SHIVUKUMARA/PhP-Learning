@@ -2,7 +2,7 @@
 <script src="<?= base_url('assets/js/popper.min.js'); ?>"></script>
 <script src="<?= base_url('assets/js/bootstrap.min.js'); ?>"></script>
 <script src="<?= base_url('assets/js/adminlte.min.js'); ?>"></script>
-<script src="<?= base_url('assets/js/jquery-3.7.1.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/jquery-3.6.0.min.js') ?>"></script>
 <script src="<?= base_url('assets/js/intlTelInput.min.js') ?>"></script>
 
 <script>

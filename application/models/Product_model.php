@@ -29,7 +29,8 @@ class Product_model extends CI_Model
     public function get_subcategories($category = null)
     {
         $this->db->select('DISTINCT sub_category', FALSE);
-        if ($category) {
+
+        if (!empty($category)) {
             $this->db->where('category', $category);
         }
         return $this->db->get('products')->result_array();

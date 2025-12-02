@@ -19,11 +19,9 @@ $this->load->view('partials/header', $data);
 
                     <div class="card-body">
 
-                        <?php if (!empty($error)): ?>
-                            <div class="alert alert-danger"><?= $error ?></div>
-                        <?php endif; ?>
+                        <div id="formMessage"></div>
 
-                        <?= form_open_multipart('products/edit/' . $product->id); ?>
+                        <?= form_open_multipart('products/edit/' . $product->id, ['id' => 'editProductForm']); ?>
 
                         <div class="row">
 
@@ -115,19 +113,51 @@ $this->load->view('partials/header', $data);
 <?php $this->load->view('partials/footer'); ?>
 
 <script>
-    document.getElementById('image_input').addEventListener('change', function(event) {
-        const [file] = this.files;
-        if (file) {
-            document.getElementById('image_preview').src = URL.createObjectURL(file);
-            document.getElementById('image_url').value = '';
-        }
-    });
+    $(document).ready(function() {
 
-    document.getElementById('image_url').addEventListener('input', function() {
-        const url = this.value;
-        if (url) {
-            document.getElementById('image_preview').src = url;
-            document.getElementById('image_input').value = '';
-        }
+        $('#editProductForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            var msgContainer = $('#formMessage');
+            msgContainer.html('');
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    if (data.success) {
+                        msgContainer.html('<div class="alert alert-success">' + data.message + '</div>');
+                    } else {
+                        msgContainer.html('<div class="alert alert-danger">' + data.message + '</div>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr, status, error);
+                    msgContainer.html('<div class="alert alert-danger">Something went wrong! Please try again.</div>');
+                }
+            });
+        });
+
+        $('#image_input').on('change', function() {
+            const [file] = this.files;
+            if (file) {
+                $('#image_preview').attr('src', URL.createObjectURL(file));
+                $('#image_url').val('');
+            }
+        });
+
+        $('#image_url').on('input', function() {
+            const url = $(this).val();
+            if (url) {
+                $('#image_preview').attr('src', url);
+                $('#image_input').val('');
+            }
+        });
+
     });
 </script>

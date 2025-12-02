@@ -3,6 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
  * @property CI_Input $input
+ * @property CI_Output $output
  * @property CI_Session $session
  * @property Product_model $Product_model
  * @property User_model $User_model
@@ -92,16 +93,21 @@ class Products extends CI_Controller
         if ($this->input->post()) {
             $image_name = null;
 
-            // File upload
             if (!empty($_FILES['image']['name'])) {
                 $image_name = $this->upload_image('image', $data['product']->image);
+                if ($image_name === false) {
+                    return $this->output
+                        ->set_content_type('application/json')
+                        ->set_output(json_encode([
+                            'success' => false,
+                            'message' => 'Image upload failed'
+                        ]));
+                }
             }
 
-            // Online image URL
+            // Image URL
             if (empty($image_name) && $this->input->post('image_url')) {
                 $image_name = $this->input->post('image_url');
-
-                // Delete old local file if exists
                 if (!empty($data['product']->image) && filter_var($data['product']->image, FILTER_VALIDATE_URL) === false) {
                     $old_path = FCPATH . 'assets/uploads/products/' . $data['product']->image;
                     if (file_exists($old_path)) unlink($old_path);
@@ -120,8 +126,14 @@ class Products extends CI_Controller
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            $this->Product_model->update($id, $update);
-            redirect('products');
+            $updated = $this->Product_model->update($id, $update);
+
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success' => $updated ? true : false,
+                    'message' => $updated ? 'Product updated successfully!' : 'Failed to update product!'
+                ]));
         }
 
         $this->load->view('products/edit', $data);
@@ -150,7 +162,7 @@ class Products extends CI_Controller
 
         $config = [
             'upload_path' => $upload_path,
-            'allowed_types' => 'jpg|jpeg|png|gif',
+            'allowed_types' => 'jpg|jpeg|png|gif|webp',
             'max_size' => 2048,
             'encrypt_name' => TRUE
         ];
@@ -161,7 +173,6 @@ class Products extends CI_Controller
         if ($this->upload->do_upload($field_name)) {
             $upload_data = $this->upload->data();
 
-            // Delete old local image if exists
             if (!empty($old_image) && filter_var($old_image, FILTER_VALIDATE_URL) === false && file_exists($upload_path . '/' . $old_image)) {
                 unlink($upload_path . '/' . $old_image);
             }

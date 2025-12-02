@@ -21,12 +21,12 @@ $this->load->view('partials/header', $data);
                         <div class="col-md-6 text-center">
                             <?php if ($product->image): ?>
                                 <?php if (filter_var($product->image, FILTER_VALIDATE_URL)): ?>
-                                    <img src="<?= $product->image ?>" class="img-fluid" style="max-height:400px; object-fit:cover;">
+                                    <img src="<?= $product->image ?>" class="img-fluid" style="max-height:350px; object-fit:cover;">
                                 <?php else: ?>
-                                    <img src="<?= base_url('assets/uploads/products/' . $product->image) ?>" class="img-fluid" style="max-height:400px; object-fit:cover;">
+                                    <img src="<?= base_url('assets/uploads/products/' . $product->image) ?>" class="img-fluid" style="max-height:350px; object-fit:cover;">
                                 <?php endif; ?>
                             <?php else: ?>
-                                <img src="<?= base_url('assets/uploads/products/default.png') ?>" class="img-fluid" style="max-height:400px; object-fit:cover;">
+                                <img src="<?= base_url('assets/uploads/products/default.png') ?>" class="img-fluid" style="max-height:350px; object-fit:cover;">
                             <?php endif; ?>
                         </div>
 
