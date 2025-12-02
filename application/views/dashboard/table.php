@@ -119,8 +119,6 @@ $this->load->view('partials/header', $data);
                     </div>
                 </div>
             </div>
-
-
         </main>
 
         <?php $this->load->view('navbar/footer'); ?>
