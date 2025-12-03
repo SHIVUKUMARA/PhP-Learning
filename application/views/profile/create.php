@@ -33,6 +33,7 @@ $this->load->view('partials/header', $data);
                         <?php endif; ?>
 
                         <?= form_open('dashboard/create_users'); ?>
+
                         <div class="form-floating mb-2">
                             <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Full Name" required autocomplete="off">
                             <label for="fullname">Full Name</label>
@@ -57,6 +58,12 @@ $this->load->view('partials/header', $data);
                             <input type="email" class="form-control" id="email" name="email" placeholder="Email" required autocomplete="off">
                             <label for="email">Email</label>
                         </div>
+
+                        <div class="form-floating mb-2">
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number"
+                                placeholder="Enter phone number" maxlength="12" value="<?= isset($phone_number) ? $phone_number : '' ?>">
+                        </div>
+                        <input type="hidden" id="country_code" name="country_code" value="<?= isset($country_code) ? $country_code : '' ?>">
 
                         <div class="form-floating mb-2">
                             <input type="password" class="form-control" id="password" name="password" placeholder="Password" required autocomplete="off">
@@ -91,7 +98,7 @@ $this->load->view('partials/header', $data);
                     </div>
 
                     <div class="card-footer text-center" style="background-color: #f8ea687a;">
-                        <small class="text-muted">You can create a new admin anytime.</small>
+                        <small class="text-muted">You can create a new user anytime.</small>
                     </div>
                 </div>
             </div>
@@ -101,5 +108,53 @@ $this->load->view('partials/header', $data);
 
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const phoneInput = document.querySelector("#phone_number");
+
+        const iti = window.intlTelInput(phoneInput, {
+            initialCountry: "in",
+            separateDialCode: true,
+            preferredCountries: ["in", "us"],
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"
+        });
+
+        function formatPhone(value) {
+            value = value.replace(/\D/g, '').substring(0, 10);
+            if (value.length > 6) {
+                return value.replace(/(\d{3})(\d{3})(\d{0,4})/, "$1-$2-$3");
+            } else if (value.length > 3) {
+                return value.replace(/(\d{3})(\d{0,3})/, "$1-$2");
+            } else {
+                return value;
+            }
+        }
+
+        phoneInput.value = formatPhone(phoneInput.value);
+
+        phoneInput.addEventListener('input', function() {
+            const cursorPos = phoneInput.selectionStart;
+            phoneInput.value = formatPhone(phoneInput.value);
+            phoneInput.setSelectionRange(cursorPos, cursorPos);
+        });
+
+        const form = phoneInput.closest("form");
+        form.addEventListener("submit", function() {
+
+            const nationalNumber = phoneInput.value.replace(/\D/g, '');
+            const countryData = iti.getSelectedCountryData();
+
+            document.querySelector("#country_code").value = "+" + countryData.dialCode;
+            phoneInput.value = nationalNumber; // raw number (no hyphens)
+        });
+    });
+</script>
 
 <?php $this->load->view('partials/footer'); ?>

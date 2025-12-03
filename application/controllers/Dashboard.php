@@ -69,15 +69,23 @@ class Dashboard extends CI_Controller
         $search_operator = $this->input->get('search_operator', TRUE);
         $search_value    = $this->input->get('search_value', TRUE);
 
-        $user_id         = $this->session->userdata('user_id');
-        $current_role    = $this->session->userdata('role');
-        $data['user']    = $this->User_model->get_user_by_id($user_id);
+        $user_id      = $this->session->userdata('user_id');
+        $current_role = $this->session->userdata('role');
+        $data['user'] = $this->User_model->get_user_by_id($user_id);
 
-        $config['base_url']    = base_url('dashboard/table');
-        $config['per_page']    = 10;
+        $config['base_url'] = base_url('dashboard/table');
+        $config['per_page'] = 10;
         $config['use_page_numbers'] = TRUE;
 
-        // Count total rows based on search or role filter
+        $datetime_columns = ['created_at', 'last_updated'];
+
+        if (in_array($search_column, $datetime_columns) && !empty($search_value)) {
+            $dt = DateTime::createFromFormat('M d, Y - h:i A', $search_value);
+            if ($dt) {
+                $search_value = $dt->format('Y-m-d H:i:s');
+            }
+        }
+
         if ($search_column && $search_operator && $search_value) {
             $config['total_rows'] = $this->User_model->count_search_users($search_column, $search_operator, $search_value);
         } elseif ($roleFilter) {
@@ -87,25 +95,25 @@ class Dashboard extends CI_Controller
         }
 
         // Pagination Bootstrap 5 setup
-        $config['full_tag_open'] = '<nav><ul class="pagination justify-content-center">';
-        $config['full_tag_close'] = '</ul></nav>';
-        $config['first_link'] = 'First';
-        $config['last_link'] = 'Last';
-        $config['first_tag_open'] = '<li class="page-item">';
+        $config['full_tag_open']   = '<nav><ul class="pagination justify-content-center">';
+        $config['full_tag_close']  = '</ul></nav>';
+        $config['first_link']      = 'First';
+        $config['last_link']       = 'Last';
+        $config['first_tag_open']  = '<li class="page-item">';
         $config['first_tag_close'] = '</li>';
-        $config['prev_link'] = '&laquo';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_link'] = '&raquo';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
-        $config['cur_tag_close'] = '</span></li>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['attributes'] = ['class' => 'page-link'];
+        $config['prev_link']       = '&laquo';
+        $config['prev_tag_open']   = '<li class="page-item">';
+        $config['prev_tag_close']  = '</li>';
+        $config['next_link']       = '&raquo';
+        $config['next_tag_open']   = '<li class="page-item">';
+        $config['next_tag_close']  = '</li>';
+        $config['last_tag_open']   = '<li class="page-item">';
+        $config['last_tag_close']  = '</li>';
+        $config['cur_tag_open']    = '<li class="page-item active"><span class="page-link">';
+        $config['cur_tag_close']   = '</span></li>';
+        $config['num_tag_open']    = '<li class="page-item">';
+        $config['num_tag_close']   = '</li>';
+        $config['attributes']      = ['class' => 'page-link'];
 
         $this->pagination->initialize($config);
 
@@ -122,23 +130,34 @@ class Dashboard extends CI_Controller
         }
 
         foreach ($users as &$u) {
-            $u->can_view = $this->can_access_user_action($u->id, 'view');
-            $u->can_edit = $this->can_access_user_action($u->id, 'edit');
+            $u->can_view   = $this->can_access_user_action($u->id, 'view');
+            $u->can_edit   = $this->can_access_user_action($u->id, 'edit');
             $u->can_delete = $this->can_access_user_action($u->id, 'delete');
         }
 
-        $data['users']         = $users;
-        $data['offset']        = $offset;
-        $data['current_page']  = $page_number;
-        $data['roleFilter']    = $roleFilter;
-        $data['search_column'] = $search_column;
+        $data['users']           = $users;
+        $data['offset']          = $offset;
+        $data['current_page']    = $page_number;
+        $data['roleFilter']      = $roleFilter;
+        $data['search_column']   = $search_column;
         $data['search_operator'] = $search_operator;
-        $data['search_value']  = $search_value;
-        $data['total_rows']    = $config['total_rows'];
+        $data['search_value']    = $search_value;
+        $data['total_rows']      = $config['total_rows'];
+
+        $query_params = [];
+        if ($roleFilter) $query_params['role'] = $roleFilter;
+        if ($search_column) $query_params['search_column'] = $search_column;
+        if ($search_operator) $query_params['search_operator'] = $search_operator;
+        if ($search_value) $query_params['search_value'] = $search_value;
+
+        if (!empty($query_params)) {
+            $config['suffix'] = '?' . http_build_query($query_params);
+            $config['first_url'] = $config['base_url'] . $config['suffix'];
+            $this->pagination->initialize($config);
+        }
 
         $this->load->view('dashboard/table', $data);
     }
-
 
     // View user
     public function view_user($id)
@@ -201,6 +220,8 @@ class Dashboard extends CI_Controller
             $email    = $this->input->post('email', TRUE);
             $password = $this->input->post('password', TRUE);
             $role     = $this->input->post('role', TRUE) ?: 'customer';
+            $phone_number  = $this->input->post('phone_number', TRUE);
+            $country_code  = $this->input->post('country_code', TRUE);
 
             if (!$fullname || !$email || !$password) {
                 $data['error'] = 'Full Name, Email, and Password are required!';
@@ -215,6 +236,8 @@ class Dashboard extends CI_Controller
                     'password'    => $password,
                     'role'        => $role,
                     'status'      => 'active',
+                    'phone_number' => $phone_number,
+                    'country_code' => $country_code,
                     'agree_terms' => 1,
                     'created_at'  => date('Y-m-d H:i:s'),
                     'last_updated' => date('Y-m-d H:i:s')
@@ -232,6 +255,8 @@ class Dashboard extends CI_Controller
             $data['lname']    = $lname;
             $data['email']    = $email;
             $data['role']     = $role;
+            $data['phone_number']  = $phone_number;
+            $data['country_code']  = $country_code;
         }
 
         $this->load->view('profile/create', $data);

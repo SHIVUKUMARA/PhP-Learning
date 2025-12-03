@@ -45,8 +45,8 @@ $this->load->view('partials/header', $data);
                         <h5 class="mb-0 text-center">Users List</h5>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive" style="max-height:500px; overflow:auto;">
-                            <table class="table table-striped table-hover align-middle text-center table-bordered" style="min-width:1200px; white-space: nowrap;">
+                        <div class="table-responsive" style="max-height:500px; overflow:auto; min-height:350px;">
+                            <table class="table table-striped table-hover align-middle text-center table-bordered">
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <?php
@@ -64,7 +64,7 @@ $this->load->view('partials/header', $data);
                                             ['field' => 'last_updated', 'label' => 'Updated on'],
                                         ];
                                         foreach ($columns as $col): ?>
-                                            <th>
+                                            <th style="width:182px;">
                                                 <?= $col['label'] ?>
                                                 <?php $this->load->view('dashboard/filter', [
                                                     'field_name' => $col['field'],
@@ -72,10 +72,13 @@ $this->load->view('partials/header', $data);
                                                     'search_value' => $search_column == $col['field'] ? $search_value : '',
                                                     'search_operator' => $search_column == $col['field'] ? $search_operator : ''
                                                 ]); ?>
+                                                <div class="resizer"></div>
                                             </th>
                                         <?php endforeach; ?>
-
-                                        <th>Actions</th>
+                                        <th style="width:150px;">
+                                            Actions
+                                            <div class="resizer"></div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -157,9 +160,56 @@ function format_phone($number)
 <script>
     $('#roleFilter').on('change', function() {
         const role = $(this).val();
-        let url = '<?= base_url("dashboard/users"); ?>';
-        if (role) url += '?role=' + role;
-        window.location.href = url;
+        const urlParams = new URLSearchParams(window.location.search);
+        if (role) {
+            urlParams.set('role', role);
+        } else {
+            urlParams.delete('role');
+        }
+        urlParams.delete('per_page');
+
+        window.location.href = '<?= base_url("dashboard/table") ?>?' + urlParams.toString();
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.querySelector('.table');
+        const cols = table.querySelectorAll('th');
+
+        cols.forEach(function(th, index) {
+            const resizer = th.querySelector('.resizer');
+            if (!resizer) return;
+
+            resizer.addEventListener('mousedown', initResize);
+
+            function initResize(e) {
+                e.preventDefault();
+                let startX = e.pageX;
+                let startWidth = th.offsetWidth;
+
+                function onMouseMove(e) {
+                    let newWidth = startWidth + (e.pageX - startX);
+                    if (newWidth > 50) {
+                        // Resize header
+                        th.style.width = newWidth + 'px';
+
+                        // Resize all cells in this column
+                        table.querySelectorAll('tbody tr').forEach(tr => {
+                            tr.children[index].style.width = newWidth + 'px';
+                        });
+                    }
+                }
+
+                function stopResize() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', stopResize);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', stopResize);
+            }
+        });
     });
 </script>
 
