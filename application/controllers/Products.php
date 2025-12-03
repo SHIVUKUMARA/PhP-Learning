@@ -55,12 +55,10 @@ class Products extends CI_Controller
         if ($this->input->post()) {
             $image_name = null;
 
-            // File upload
             if (!empty($_FILES['image']['name'])) {
                 $image_name = $this->upload_image('image');
             }
 
-            // Online image URL
             if (empty($image_name) && $this->input->post('image_url')) {
                 $image_name = $this->input->post('image_url');
             }
@@ -76,8 +74,13 @@ class Products extends CI_Controller
                 'image' => $image_name
             ];
 
-            $this->Product_model->insert($product);
-            redirect('products');
+            $inserted = $this->Product_model->insert($product);
+
+            echo json_encode([
+                'success' => $inserted ? true : false,
+                'message' => $inserted ? 'Product added successfully!' : 'Failed to add product.'
+            ]);
+            return;
         }
 
         $this->load->view('products/add');

@@ -11,24 +11,22 @@ $this->load->view('partials/header', $data);
         <?php $this->load->view('navbar/sidebar'); ?>
 
         <main class="app-main d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px); padding: 20px;">
-            <div class="card shadow-lg border-0 rounded-lg w-100" style="max-width: 700px;">
+            <div class="card shadow-lg border-0 rounded-lg w-100">
                 <div class="card-header bg-primary text-white text-center">
                     <h3 class="mb-0">Add Product</h3>
                 </div>
                 <div class="card-body">
-                    <?php if (!empty($error)): ?>
-                        <div class="alert alert-danger"><?= $error ?></div>
-                    <?php endif; ?>
 
-                    <?= form_open_multipart('products/add'); ?>
+                    <div id="msg"></div>
 
+                    <?= form_open_multipart('products/add', ['id' => 'addProductForm']); ?>
                     <div class="form-floating mb-3">
                         <input type="text" name="name" class="form-control" id="name" placeholder="Product Name" required>
                         <label for="name">Product Name</label>
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-md-6">
+                        <div class="form-floating col-md-6">
                             <select name="category" class="form-select" id="category" required>
                                 <option value="">-- Select Category --</option>
                                 <option value="Beauty">Beauty</option>
@@ -43,16 +41,18 @@ $this->load->view('partials/header', $data);
                                 <option value="Grocery">Grocery</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="form-floating col-md-6">
                             <input type="text" name="sub_category" class="form-control" id="sub_category" placeholder="Sub Category">
+                            <label for="sub_category">Sub Category</label>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-md-6">
+                        <div class="form-floating col-md-6">
                             <input type="number" name="stock" class="form-control" id="stock" value="0" placeholder="Stock">
+                            <label for="stock">Stock</label>
                         </div>
-                        <div class="col-md-6">
+                        <div class="form-floating col-md-6">
                             <select name="availability" class="form-select" id="availability">
                                 <option value="">Availability</option>
                                 <option value="In Stock">In Stock</option>
@@ -71,7 +71,6 @@ $this->load->view('partials/header', $data);
                         <label for="price">Price (₹)</label>
                     </div>
 
-                    <!-- Image Upload & URL Side by Side -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="image_input" class="form-label">Upload Image</label>
@@ -81,7 +80,7 @@ $this->load->view('partials/header', $data);
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="image_url" class="form-label">Or enter Image URL</label>
+                            <label for="image_url" class="form-label">Or Image URL</label>
                             <input type="url" name="image_url" id="image_url" class="form-control" placeholder="https://example.com/image.jpg">
                         </div>
                     </div>
@@ -106,21 +105,53 @@ $this->load->view('partials/header', $data);
 </div>
 
 <script>
-    // Image preview for upload
-    document.getElementById('image_input').addEventListener('change', function(event) {
-        const [file] = this.files;
-        if (file) {
-            document.getElementById('image_preview').src = URL.createObjectURL(file);
-            document.getElementById('image_url').value = '';
-        }
-    });
+    $(document).ready(function() {
+        $('#image_input').on('change', function() {
+            const [file] = this.files;
+            if (file) {
+                $('#image_preview').attr('src', URL.createObjectURL(file));
+                $('#image_url').val('');
+            }
+        });
 
-    // Image preview for URL
-    document.getElementById('image_url').addEventListener('input', function() {
-        const url = this.value;
-        if (url) {
-            document.getElementById('image_preview').src = url;
-            document.getElementById('image_input').value = '';
-        }
+        $('#image_url').on('input', function() {
+            const url = $(this).val();
+            if (url) {
+                $('#image_preview').attr('src', url);
+                $('#image_input').val('');
+            }
+        });
+
+        $('#addProductForm').on('submit', function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                beforeSend: function() {
+                    $('#msg').html('<div class="alert alert-info">Processing...</div>');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
+                        $('#addProductForm')[0].reset();
+                        $('#image_preview').attr('src', '<?= base_url('assets/uploads/products/default.png'); ?>');
+                    } else {
+                        $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                },
+                error: function(xhr) {
+                    let err = xhr.responseJSON?.message ?? 'Something went wrong!';
+                    $('#msg').html('<div class="alert alert-danger">' + err + '</div>');
+                }
+            });
+        });
+
     });
 </script>

@@ -72,19 +72,21 @@ $this->load->view('partials/header', $data);
                                     value="<?= $product->price; ?>" required>
                             </div>
 
-                            <div class="col-md-12 mb-3">
-                                <label>Image</label>
-                                <input type="file" name="image" id="image_input" class="form-control">
-
-                                <div class="mt-2">
-                                    <img id="image_preview" src="<?= $product->image ? (filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : base_url('assets/uploads/products/' . $product->image)) : base_url('assets/uploads/products/default.png'); ?>"
-                                        class="img-thumbnail" style="height:120px;">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="image_input" class="form-label">Upload Image</label>
+                                    <input type="file" name="image" id="image_input" class="form-control">
+                                    <div class="mt-2">
+                                        <img id="image_preview"
+                                            src="<?= $product->image ? (filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : base_url('assets/uploads/products/' . $product->image)) : base_url('assets/uploads/products/default.png'); ?>"
+                                            class="img-thumbnail" style="height:120px; width:auto;">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-3">
-                                <label for="image_url" class="form-label">Or enter Image URL</label>
-                                <input type="url" name="image_url" id="image_url" class="form-control" placeholder="https://example.com/image.jpg">
+                                <div class="col-md-6">
+                                    <label for="image_url" class="form-label">Or enter Image URL</label>
+                                    <input type="url" name="image_url" id="image_url" class="form-control" placeholder="https://example.com/image.jpg">
+                                </div>
                             </div>
 
                         </div>

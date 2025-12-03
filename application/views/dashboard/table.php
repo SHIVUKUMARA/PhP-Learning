@@ -191,10 +191,8 @@ function format_phone($number)
                 function onMouseMove(e) {
                     let newWidth = startWidth + (e.pageX - startX);
                     if (newWidth > 50) {
-                        // Resize header
                         th.style.width = newWidth + 'px';
 
-                        // Resize all cells in this column
                         table.querySelectorAll('tbody tr').forEach(tr => {
                             tr.children[index].style.width = newWidth + 'px';
                         });
