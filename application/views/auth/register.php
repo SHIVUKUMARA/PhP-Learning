@@ -71,12 +71,12 @@ $this->load->view('partials/header');
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   $(document).ready(function() {
-    $('#editProductForm').on('submit', function(e) {
+    $('#registerForm').on('submit', function(e) {
       e.preventDefault();
 
-      var formData = new FormData(this);
+      var formData = $(this).serialize();
 
-      $('#formMessage').html('');
+      $('#ajaxMessage').html('');
       $('button[type="submit"]').prop('disabled', true);
 
       $.ajax({
@@ -84,38 +84,23 @@ $this->load->view('partials/header');
         type: 'POST',
         data: formData,
         dataType: 'json',
-        processData: false,
-        contentType: false,
         success: function(data) {
-          if (data.success) {
-            $('#formMessage').html('<div class="alert alert-success">' + data.message + '</div>');
+          if (data.status === 'success') {
+            $('#ajaxMessage').html('<div class="alert alert-success">' + data.message + '</div>');
+            setTimeout(function() {
+              window.location.href = '<?= site_url("auth/login"); ?>';
+            }, 2000);
           } else {
-            $('#formMessage').html('<div class="alert alert-danger">' + data.message + '</div>');
+            $('#ajaxMessage').html('<div class="alert alert-danger">' + data.message + '</div>');
           }
         },
         error: function(xhr, status, error) {
-          $('#formMessage').html('<div class="alert alert-danger">Something went wrong. Please try again.</div>');
+          $('#ajaxMessage').html('<div class="alert alert-danger">Something went wrong. Please try again.</div>');
         },
         complete: function() {
           $('button[type="submit"]').prop('disabled', false);
         }
       });
-    });
-
-    $('#image_input').on('change', function() {
-      const [file] = this.files;
-      if (file) {
-        $('#image_preview').attr('src', URL.createObjectURL(file));
-        $('#image_url').val('');
-      }
-    });
-
-    $('#image_url').on('input', function() {
-      const url = $(this).val();
-      if (url) {
-        $('#image_preview').attr('src', url);
-        $('#image_input').val('');
-      }
     });
   });
 </script>

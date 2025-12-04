@@ -234,5 +234,12 @@ function format_phone($number)
 
             window.location.href = url;
         });
+
+        $(document).on('input', '.column-search-form input[name="value"]', function() {
+            const words = $(this).val().trim().split(/\s+/);
+            if (words.length > 10) {
+                $(this).val(words.slice(0, 10).join(' '));
+            }
+        });
     });
 </script>

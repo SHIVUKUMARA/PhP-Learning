@@ -61,9 +61,9 @@ $this->load->view('partials/header', $data);
                         </div>
                     </div>
 
-                    <div class="form-floating mb-3">
-                        <textarea name="description" class="form-control" id="description" placeholder="Product Description" style="height:100px;"></textarea>
-                        <label for="description">Description</label>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea name="description" id="description" class="form-control"></textarea>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -104,6 +104,7 @@ $this->load->view('partials/header', $data);
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
 <script>
     $(document).ready(function() {
         $('#image_input').on('change', function() {
@@ -154,4 +155,12 @@ $this->load->view('partials/header', $data);
         });
 
     });
+</script>
+
+<script>
+    ClassicEditor
+        .create(document.querySelector('#description'))
+        .catch(error => {
+            console.error(error);
+        });
 </script>
