@@ -73,14 +73,10 @@ $route['auth/reset_password/(:any)'] = 'auth/reset_password/$1';
 $route['interaction'] = 'interaction/index';
 $route['interaction/lang/(:any)'] = 'interaction/set_language/$1';
 $route['dashboard/api_table'] = 'Api_table/index';
-// Products listing (accessible to all)
+
+// Products
 $route['products'] = 'products/index';
-
-// Add product (admin only)
 $route['products/add'] = 'products/add';
-
-// Edit product (admin only)
 $route['products/edit/(:num)'] = 'products/edit/$1';
-
-// Delete product (admin only)
 $route['products/delete/(:num)'] = 'products/delete/$1';
+$route['products/table'] = 'products/table';

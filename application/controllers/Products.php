@@ -8,6 +8,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property Product_model $Product_model
  * @property User_model $User_model
  * @property CI_Upload $upload
+ * @property CI_Pagination $pagination
+ * @property CI_Uri $uri
  */
 class Products extends CI_Controller
 {
@@ -36,14 +38,62 @@ class Products extends CI_Controller
 
     public function index()
     {
-        $category = $this->input->get('category');
-        $sub_category = $this->input->get('sub_category');
+        $categoryFilter = null;
+        $subCategoryFilter = null;
 
-        $data['products'] = $this->Product_model->get_all($category, $sub_category);
-        $data['categories'] = $this->Product_model->get_categories();
-        $data['subcategories'] = $this->Product_model->get_subcategories($category);
-        $data['selected_category'] = $category;
-        $data['selected_subcategory'] = $sub_category;
+        if ($this->input->get('category_sub')) {
+            $parts = explode('||', $this->input->get('category_sub'));
+            $categoryFilter = $parts[0] ?? null;
+            $subCategoryFilter = $parts[1] ?? null;
+        }
+
+        $categories = $this->Product_model->get_categories();
+        $nested_categories = [];
+        foreach ($categories as $c) {
+            $nested_categories[$c['category']] = $this->Product_model->get_subcategories($c['category']);
+        }
+
+        $data['nested_categories'] = $nested_categories;
+        $data['selected_category'] = $categoryFilter;
+        $data['selected_subcategory'] = $subCategoryFilter;
+
+        $this->load->library('pagination');
+
+        $config['base_url'] = site_url('products');
+        $config['total_rows'] = $this->Product_model->count_filtered($categoryFilter, $subCategoryFilter);
+        $config['per_page'] = 12;
+        $config['page_query_string'] = TRUE;
+        $config['query_string_segment'] = 'page';
+
+        $config['full_tag_open'] = '<nav><ul class="pagination justify-content-center">';
+        $config['full_tag_close'] = '</ul></nav>';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link" href="#">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['attributes'] = ['class' => 'page-link'];
+
+
+        $this->pagination->initialize($config);
+
+        $page = $this->input->get('page') ?? 0;
+
+        $data['products'] = $this->Product_model->get_filtered(
+            $categoryFilter,
+            $subCategoryFilter,
+            $config['per_page'],
+            $page
+        );
+
+        $data['pagination'] = $this->pagination->create_links();
 
         $this->load->view('products/list', $data);
     }
@@ -108,7 +158,6 @@ class Products extends CI_Controller
                 }
             }
 
-            // Image URL
             if (empty($image_name) && $this->input->post('image_url')) {
                 $image_name = $this->input->post('image_url');
                 if (!empty($data['product']->image) && filter_var($data['product']->image, FILTER_VALIDATE_URL) === false) {
@@ -191,5 +240,57 @@ class Products extends CI_Controller
         $data['product'] = $this->Product_model->get_by_id($id);
         if (!$data['product']) show_404();
         $this->load->view('products/view', $data);
+    }
+
+    public function table()
+    {
+        $categoryFilter = null;
+        $subCategoryFilter = null;
+
+        if ($this->input->get('category_sub')) {
+            $parts = explode('||', $this->input->get('category_sub'));
+            $categoryFilter = $parts[0] ?? null;
+            $subCategoryFilter = $parts[1] ?? null;
+        }
+
+        $categories = $this->Product_model->get_categories();
+        $nested_categories = [];
+        foreach ($categories as $c) {
+            $nested_categories[$c['category']] = $this->Product_model->get_subcategories($c['category']);
+        }
+
+        $data['nested_categories'] = $nested_categories;
+        $data['selected_category'] = $categoryFilter;
+        $data['selected_subcategory'] = $subCategoryFilter;
+
+        $config['base_url'] = base_url('products/table');
+        $config['per_page'] = 10;
+        $config['use_page_numbers'] = TRUE;
+        $config['total_rows'] = $this->Product_model->count_filtered($categoryFilter, $subCategoryFilter);
+
+        $config['full_tag_open'] = '<nav><ul class="pagination justify-content-center">';
+        $config['full_tag_close'] = '</ul></nav>';
+        $config['first_link'] = 'First';
+        $config['last_link'] = 'Last';
+        $config['prev_link'] = '&laquo';
+        $config['next_link'] = '&raquo';
+        $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
+        $config['cur_tag_close'] = '</span></li>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['attributes'] = ['class' => 'page-link'];
+
+        $this->pagination->initialize($config);
+
+        $page_number = $this->uri->segment(3);
+        $page_number = ($page_number && ctype_digit($page_number)) ? (int)$page_number : 1;
+        $offset = ($page_number - 1) * $config['per_page'];
+
+        $data['products'] = $this->Product_model->get_filtered($categoryFilter, $subCategoryFilter, $config['per_page'], $offset);
+        $data['offset'] = $offset;
+        $data['current_page'] = $page_number;
+        $data['total_rows'] = $config['total_rows'];
+
+        $this->load->view('products/table', $data);
     }
 }

@@ -25,24 +25,37 @@ $segment4 = $this->uri->segment(4);
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($segment2 == 'table' || $segment2 == 'api_table') ? 'menu-open' : '' ?>">
-                    <a href="#" class="nav-link <?= ($segment2 == 'table' || $segment2 == 'api_table') ? 'active' : '' ?>">
+                <li class="nav-item <?=
+                                    ($segment1 == 'dashboard' && ($segment2 == 'table' || $segment2 == 'api_table'))
+                                        || ($segment1 == 'products' && $segment2 == 'table') ? 'menu-open' : ''
+                                    ?>">
+                    <a href="#" class="nav-link <?=
+                                                ($segment1 == 'dashboard' && ($segment2 == 'table' || $segment2 == 'api_table'))
+                                                    || ($segment1 == 'products' && $segment2 == 'table') ? 'active' : ''
+                                                ?>">
                         <i class="nav-icon bi bi-table"></i>
                         <p>Tables <i class="nav-arrow bi bi-chevron-right"></i></p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
                             <a href="<?= base_url('dashboard/table') ?>"
-                                class="nav-link <?= ($segment2 == 'table') ? 'active' : '' ?>">
+                                class="nav-link <?= ($segment1 == 'dashboard' && $segment2 == 'table') ? 'active' : '' ?>">
                                 <i class="nav-icon bi bi-circle"></i>
                                 <p>Users Table</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="<?= base_url('dashboard/api_table') ?>"
-                                class="nav-link <?= ($segment2 == 'api_table') ? 'active' : '' ?>">
+                                class="nav-link <?= ($segment1 == 'dashboard' && $segment2 == 'api_table') ? 'active' : '' ?>">
                                 <i class="nav-icon bi bi-circle"></i>
                                 <p>API Table</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url('products/table') ?>"
+                                class="nav-link <?= ($segment1 == 'products' && $segment2 == 'table') ? 'active' : '' ?>">
+                                <i class="nav-icon bi bi-boxes"></i>
+                                <p>Products Table</p>
                             </a>
                         </li>
                     </ul>

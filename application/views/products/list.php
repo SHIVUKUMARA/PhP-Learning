@@ -14,21 +14,26 @@ $this->load->view('partials/header', $data);
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
 
                     <form method="GET" action="<?= site_url('products'); ?>" class="d-flex gap-2 align-items-center">
-                        <select name="category" class="form-select">
+                        <select name="category_sub" class="form-select">
                             <option value="">All Categories</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['category'] ?>" <?= ($selected_category == $cat['category']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($cat['category']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <select name="sub_category" class="form-select">
-                            <option value="">All Subcategories</option>
-                            <?php foreach ($subcategories as $sub): ?>
-                                <option value="<?= $sub['sub_category'] ?>" <?= ($selected_subcategory == $sub['sub_category']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($sub['sub_category']) ?>
-                                </option>
+                            <?php foreach ($nested_categories as $cat => $subcats): ?>
+                                <optgroup label="<?= htmlspecialchars($cat) ?>">
+                                    <?php if (!empty($subcats)): ?>
+                                        <?php foreach ($subcats as $sub): ?>
+                                            <?php
+                                            $value = $cat . '||' . $sub['sub_category'];
+                                            $selected = ($selected_category == $cat && $selected_subcategory == $sub['sub_category']) ? 'selected' : '';
+                                            ?>
+                                            <option value="<?= $value ?>" <?= $selected ?>>
+                                                <?= htmlspecialchars($sub['sub_category']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <option value="<?= $cat ?>" <?= ($selected_category == $cat && !$selected_subcategory) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($cat) ?>
+                                        </option>
+                                    <?php endif; ?>
+                                </optgroup>
                             <?php endforeach; ?>
                         </select>
 
@@ -85,6 +90,9 @@ $this->load->view('partials/header', $data);
                 <?php else: ?>
                     <p class="text-center fs-5 mt-5">No products found.</p>
                 <?php endif; ?>
+                <div class="mt-4">
+                    <?= $pagination ?>
+                </div>
 
             </div>
         </main>

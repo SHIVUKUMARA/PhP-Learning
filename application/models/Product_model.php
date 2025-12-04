@@ -55,4 +55,41 @@ class Product_model extends CI_Model
     {
         return $this->db->where('id', $id)->delete('products');
     }
+
+    public function count_all()
+    {
+        return $this->db->count_all('products');
+    }
+
+    public function get_filtered($category = null, $sub_category = null, $limit = 10, $offset = 0)
+    {
+        $this->db->from('products');
+
+        if ($category) {
+            $this->db->where('category', $category);
+        }
+
+        if ($sub_category) {
+            $this->db->where('sub_category', $sub_category);
+        }
+
+        $this->db->order_by('created_at', 'DESC');
+
+        return $this->db->get('', $limit, $offset)->result();
+    }
+
+    public function count_filtered($category = null, $sub_category = null)
+    {
+        $this->db->from('products');
+
+        if ($category) {
+            $this->db->where('category', $category);
+        }
+
+        if ($sub_category) {
+            $this->db->where('sub_category', $sub_category);
+        }
+
+        return $this->db->count_all_results();
+    }
 }
