@@ -33,8 +33,27 @@ $this->load->view('partials/header', $data);
 
                             <div class="col-md-6 mb-3">
                                 <label>Category</label>
-                                <input type="text" name="category" class="form-control"
-                                    value="<?= $product->category; ?>">
+
+                                <div class="dropdown">
+                                    <button class="form-control text-start dropdown-toggle" type="button"
+                                        id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <?= $product->category ? htmlspecialchars($product->category) : 'Select Category' ?>
+                                    </button>
+
+                                    <ul class="dropdown-menu w-100" aria-labelledby="categoryDropdown" style="z-index: 2000;">
+                                        <?php foreach ($categories as $cat): ?>
+                                            <li>
+                                                <a class="dropdown-item <?= ($product->category === $cat ? 'active bg-primary text-white' : '') ?>"
+                                                    href="#"
+                                                    onclick="event.preventDefault(); document.getElementById('categoryInput').value='<?= htmlspecialchars($cat) ?>'; document.getElementById('categoryDropdown').innerText='<?= htmlspecialchars($cat) ?>';">
+                                                    <?= htmlspecialchars($cat) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+
+                                <input type="hidden" name="category" id="categoryInput" value="<?= htmlspecialchars($product->category) ?>">
                             </div>
 
                             <div class="col-md-6 mb-3">

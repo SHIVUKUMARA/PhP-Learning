@@ -10,26 +10,43 @@ $this->load->view('partials/header', $data);
 
         <main class="app-main">
             <div class="container-fluid mt-4">
-                <div class="d-flex mb-3 align-items-center gap-2">
-                    <form method="get" action="<?= base_url('products/table'); ?>" class="d-flex gap-2">
-
-                        <select name="category_sub" class="form-select" onchange="this.form.submit()">
-                            <option value="">-- Select Category --</option>
-
-                            <?php foreach ($nested_categories as $cat => $subcats): ?>
-                                <optgroup label="<?= $cat; ?>">
-                                    <?php foreach ($subcats as $sc): ?>
-                                        <option value="<?= $cat . '||' . $sc['sub_category']; ?>"
-                                            <?= ($selected_category == $cat && $selected_subcategory == $sc['sub_category']) ? 'selected' : ''; ?>>
-                                            <?= $sc['sub_category']; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </optgroup>
-                            <?php endforeach; ?>
-                        </select>
-
-                    </form>
+                <div class="dropdown mb-3">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <?= $selected_category ? htmlspecialchars($selected_category) . ($selected_subcategory ? ' - ' . htmlspecialchars($selected_subcategory) : '') : 'Select Category' ?>
+                    </button>
+                    <ul class="dropdown-menu p-2" aria-labelledby="categoryDropdown" style="min-width: 220px; z-index:1055;" data-bs-auto-close="outside">
+                        <?php foreach ($nested_categories as $cat => $subcats): ?>
+                            <?php if (!empty($subcats)): ?>
+                                <li class="category-accordion">
+                                    <a href="#" class="dropdown-item category-toggle <?= ($selected_category == $cat) ? 'bg-primary text-white' : '' ?>">
+                                        <?= htmlspecialchars($cat) ?> <span class="arrow">▼</span>
+                                    </a>
+                                    <ul class="nested-menu list-unstyled ps-3 mb-0" style="display: <?= ($selected_category == $cat) ? 'block' : 'none' ?>;">
+                                        <?php foreach ($subcats as $sub): ?>
+                                            <li>
+                                                <a href="#" class="dropdown-item subcategory-item <?= ($selected_category == $cat && $selected_subcategory == $sub['sub_category']) ? 'bg-primary text-white' : '' ?>"
+                                                    data-category="<?= htmlspecialchars($cat) ?>"
+                                                    data-subcategory="<?= htmlspecialchars($sub['sub_category']) ?>">
+                                                    <?= htmlspecialchars($sub['sub_category']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </li>
+                            <?php else: ?>
+                                <li>
+                                    <a class="dropdown-item category-item <?= ($selected_category == $cat && !$selected_subcategory) ? 'bg-primary text-white' : '' ?>"
+                                        href="#" data-category="<?= htmlspecialchars($cat) ?>">
+                                        <?= htmlspecialchars($cat) ?>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
+                <form id="filterForm" method="GET" action="<?= base_url('products/table'); ?>">
+                    <input type="hidden" name="category_sub" id="category_sub">
+                </form>
                 <div class="card shadow-sm">
 
                     <div class="card-header bg-primary text-white">
@@ -106,3 +123,38 @@ $this->load->view('partials/header', $data);
 </div>
 
 <?php $this->load->view('partials/footer'); ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.category-item').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('category_sub').value = this.dataset.category;
+                document.getElementById('filterForm').submit();
+            });
+        });
+
+        document.querySelectorAll('.subcategory-item').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('category_sub').value = this.dataset.category + '||' + this.dataset.subcategory;
+                document.getElementById('filterForm').submit();
+            });
+        });
+
+        document.querySelectorAll('.category-toggle').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const parent = this.parentElement;
+                const nested = parent.querySelector('.nested-menu');
+                if (nested.style.display === 'block') {
+                    nested.style.display = 'none';
+                    parent.classList.remove('show');
+                } else {
+                    nested.style.display = 'block';
+                    parent.classList.add('show');
+                }
+            });
+        });
+    });
+</script>

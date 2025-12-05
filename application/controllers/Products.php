@@ -143,6 +143,8 @@ class Products extends CI_Controller
         $data['product'] = $this->Product_model->get_by_id($id);
         if (!$data['product']) show_404();
 
+        $data['categories'] = array_column($this->Product_model->get_categories(), 'category');
+
         if ($this->input->post()) {
             $image_name = null;
 

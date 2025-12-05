@@ -66,3 +66,21 @@ input#phone.iti {
 	z-index: 10;
 	background: transparent;
 }
+
+.category-accordion .nested-menu {
+	display: none;
+}
+
+.category-accordion.show > .nested-menu {
+	display: block;
+}
+
+.category-accordion .arrow {
+	float: right;
+	transition: transform 0.3s ease;
+	font-size: 0.8rem;
+}
+
+.category-accordion.show > .category-toggle .arrow {
+	transform: rotate(180deg);
+}
