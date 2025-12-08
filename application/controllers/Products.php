@@ -265,7 +265,7 @@ class Products extends CI_Controller
 
     public function view($id)
     {
-        $data['product'] = $this->Product_model->get_by_id($id);
+        $data['product'] = $this->Product_model->get_by_id_with_names($id);
         if (!$data['product']) show_404();
         $this->load->view('products/view', $data);
     }

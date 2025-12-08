@@ -31,9 +31,9 @@ $this->load->view('partials/header', $data);
                                 <h1 class="fw-bold mb-3"><?= htmlspecialchars($product->name) ?></h1>
 
                                 <div class="mb-3">
-                                    <span class="badge bg-primary me-1"><?= htmlspecialchars($product->category) ?></span>
-                                    <?php if ($product->sub_category): ?>
-                                        <span class="badge bg-secondary"><?= htmlspecialchars($product->sub_category) ?></span>
+                                    <span class="badge bg-primary me-1"><?= htmlspecialchars($product->category_name ?? 'N/A') ?></span>
+                                    <?php if (!empty($product->sub_category_name)): ?>
+                                        <span class="badge bg-secondary"><?= htmlspecialchars($product->sub_category_name) ?></span>
                                     <?php endif; ?>
                                 </div>
 

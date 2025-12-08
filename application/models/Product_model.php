@@ -132,4 +132,14 @@ class Product_model extends CI_Model
         $this->db->order_by('created_at', 'DESC');
         return $this->db->get()->result_array();
     }
+
+    public function get_by_id_with_names($id)
+    {
+        $this->db->select('p.*, c.cat_name AS category_name, sc.sub_cat_name AS sub_category_name');
+        $this->db->from('products p');
+        $this->db->join('categories c', 'p.category = c.cat_id', 'left');
+        $this->db->join('subcategories sc', 'p.sub_category = sc.sub_cat_id', 'left');
+        $this->db->where('p.id', $id);
+        return $this->db->get()->row();
+    }
 }
