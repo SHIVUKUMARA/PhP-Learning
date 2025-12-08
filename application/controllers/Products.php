@@ -10,6 +10,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property CI_Upload $upload
  * @property CI_Pagination $pagination
  * @property CI_Uri $uri
+ * @property CI_Security $security
  */
 class Products extends CI_Controller
 {
@@ -136,21 +137,35 @@ class Products extends CI_Controller
         $this->load->view('products/add');
     }
 
+    public function get_subcategories_ajax()
+    {
+        $cat_id = $this->input->post('cat_id');
+        $subcategories = $this->Product_model->get_subcategories_by_parent($cat_id);
+
+        echo json_encode([
+            'csrfHash' => $this->security->get_csrf_hash(),
+            'data' => $subcategories
+        ]);
+    }
+
     public function edit($id)
     {
         if (!$this->is_admin()) show_error('Unauthorized', 403);
 
-        $data['product'] = $this->Product_model->get_by_id($id);
-        if (!$data['product']) show_404();
+        $product = $this->Product_model->get_by_id($id);
+        if (!$product) show_404();
 
-        $data['categories'] = array_column($this->Product_model->get_categories(), 'category');
+        // Categories and subcategories
+        $categories = $this->Product_model->get_all_categories();
+        $subcategories = $this->Product_model->get_subcategories_by_parent($product->category); // category must be cat_id
 
         if ($this->input->post()) {
-            $image_name = null;
+            $image_name = $product->image;
 
+            // Image upload
             if (!empty($_FILES['image']['name'])) {
-                $image_name = $this->upload_image('image', $data['product']->image);
-                if ($image_name === false) {
+                $uploaded = $this->upload_image('image', $product->image);
+                if ($uploaded === false) {
                     return $this->output
                         ->set_content_type('application/json')
                         ->set_output(json_encode([
@@ -158,17 +173,21 @@ class Products extends CI_Controller
                             'message' => 'Image upload failed'
                         ]));
                 }
+                $image_name = $uploaded;
             }
 
-            if (empty($image_name) && $this->input->post('image_url')) {
-                $image_name = $this->input->post('image_url');
-                if (!empty($data['product']->image) && filter_var($data['product']->image, FILTER_VALIDATE_URL) === false) {
-                    $old_path = FCPATH . 'assets/uploads/products/' . $data['product']->image;
+            // Image URL input
+            $image_url = $this->input->post('image_url');
+            if (!empty($image_url)) {
+                // Delete old file if exists and not a URL
+                if (!empty($product->image) && filter_var($product->image, FILTER_VALIDATE_URL) === false) {
+                    $old_path = FCPATH . 'assets/uploads/products/' . $product->image;
                     if (file_exists($old_path)) unlink($old_path);
                 }
+                $image_name = $image_url;
             }
 
-            $update = [
+            $update_data = [
                 'name' => $this->input->post('name'),
                 'description' => $this->input->post('description'),
                 'category' => $this->input->post('category'),
@@ -176,11 +195,11 @@ class Products extends CI_Controller
                 'stock' => $this->input->post('stock'),
                 'availability' => $this->input->post('availability'),
                 'price' => $this->input->post('price'),
-                'image' => $image_name ?? $data['product']->image,
+                'image' => $image_name,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            $updated = $this->Product_model->update($id, $update);
+            $updated = $this->Product_model->update($id, $update_data);
 
             return $this->output
                 ->set_content_type('application/json')
@@ -190,8 +209,15 @@ class Products extends CI_Controller
                 ]));
         }
 
+        $data = [
+            'product' => $product,
+            'categories' => $categories,
+            'subcategories' => $subcategories
+        ];
+
         $this->load->view('products/edit', $data);
     }
+
 
     public function delete($id)
     {
@@ -294,5 +320,76 @@ class Products extends CI_Controller
         $data['total_rows'] = $config['total_rows'];
 
         $this->load->view('products/table', $data);
+    }
+
+    public function category()
+    {
+        if (!$this->is_admin()) show_error('Unauthorized', 403);
+
+        $data['error'] = '';
+
+        if ($this->input->post()) {
+            $cat_name = trim($this->input->post('category_name'));
+
+            if (empty($cat_name)) {
+                $data['error'] = 'Category name is required.';
+            } else {
+                if ($this->Product_model->category_exists($cat_name)) {
+                    $data['error'] = 'Category already exists.';
+                } else {
+                    $inserted = $this->Product_model->insert_category([
+                        'cat_name' => $cat_name
+                    ]);
+
+                    if ($inserted) {
+                        $this->session->set_flashdata('success', 'Category created successfully.');
+                        redirect('products/category');
+                    } else {
+                        $data['error'] = 'Failed to create category. Please try again.';
+                    }
+                }
+            }
+        }
+
+        $this->load->view('products/category', $data);
+    }
+
+    public function subcategory()
+    {
+        if (!$this->is_admin()) show_error('Unauthorized', 403);
+
+        $data['title'] = "Create Subcategory";
+        $data['error'] = '';
+
+        // Fetch all categories from categories table
+        $data['categories'] = $this->Product_model->get_all_categories();
+
+        if ($this->input->post()) {
+            $parent_cat_id = $this->input->post('parent_category');
+            $sub_cat_name = trim($this->input->post('sub_category_name'));
+
+            if (empty($parent_cat_id) || empty($sub_cat_name)) {
+                $data['error'] = 'All fields are required.';
+            } else {
+                // Check if subcategory already exists under selected category
+                if ($this->Product_model->subcategory_exists($sub_cat_name, $parent_cat_id)) {
+                    $data['error'] = 'Subcategory already exists under this category.';
+                } else {
+                    $inserted = $this->Product_model->insert_subcategory([
+                        'sub_cat_name'  => $sub_cat_name,
+                        'parent_cat_id' => $parent_cat_id
+                    ]);
+
+                    if ($inserted) {
+                        $this->session->set_flashdata('success_subcategory', 'Subcategory created successfully.');
+                        redirect('products/subcategory');
+                    } else {
+                        $data['error'] = 'Failed to create subcategory. Please try again.';
+                    }
+                }
+            }
+        }
+
+        $this->load->view('products/subcategory', $data);
     }
 }

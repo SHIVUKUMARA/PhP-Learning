@@ -92,4 +92,44 @@ class Product_model extends CI_Model
 
         return $this->db->count_all_results();
     }
+
+    public function category_exists($cat_name)
+    {
+        $this->db->from('categories');
+        $this->db->where('cat_name', $cat_name);
+        return $this->db->count_all_results() > 0;
+    }
+
+    public function insert_category($data)
+    {
+        return $this->db->insert('categories', $data);
+    }
+
+    public function get_all_categories()
+    {
+        return $this->db->get('categories')->result_array();
+    }
+
+    public function subcategory_exists($sub_cat_name, $parent_cat_id)
+    {
+        $this->db->from('subcategories');
+        $this->db->where('sub_cat_name', $sub_cat_name);
+        $this->db->where('parent_cat_id', $parent_cat_id);
+        return $this->db->count_all_results() > 0;
+    }
+
+    public function insert_subcategory($data)
+    {
+        return $this->db->insert('subcategories', $data);
+    }
+
+    public function get_subcategories_by_parent($parent_cat_id = null)
+    {
+        $this->db->from('subcategories');
+        if ($parent_cat_id) {
+            $this->db->where('parent_cat_id', $parent_cat_id);
+        }
+        $this->db->order_by('created_at', 'DESC');
+        return $this->db->get()->result_array();
+    }
 }

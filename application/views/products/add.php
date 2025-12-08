@@ -20,33 +20,33 @@ $this->load->view('partials/header', $data);
                     <div id="msg"></div>
 
                     <?= form_open_multipart('products/add', ['id' => 'addProductForm']); ?>
+
+                    <!-- Product Name -->
                     <div class="form-floating mb-3">
                         <input type="text" name="name" class="form-control" id="name" placeholder="Product Name" required>
                         <label for="name">Product Name</label>
                     </div>
 
+                    <!-- Category & Subcategory -->
                     <div class="row g-3 mb-3">
                         <div class="form-floating col-md-6">
                             <select name="category" class="form-select" id="category" required>
-                                <option value="">-- Select Category --</option>
-                                <option value="Beauty">Beauty</option>
-                                <option value="Electronics">Electronics</option>
-                                <option value="Clothing">Clothing</option>
-                                <option value="Home & Kitchen">Home & Kitchen</option>
-                                <option value="Books">Books</option>
-                                <option value="Toys">Toys</option>
-                                <option value="Sports">Sports</option>
-                                <option value="Automotive">Automotive</option>
-                                <option value="Health">Health</option>
-                                <option value="Grocery">Grocery</option>
+                                <option value="">Select Category</option>
+                                <?php foreach ($this->Product_model->get_all_categories() as $cat): ?>
+                                    <option value="<?= $cat['cat_id'] ?>"><?= $cat['cat_name'] ?></option>
+                                <?php endforeach; ?>
                             </select>
+                            <label for="category">Category</label>
                         </div>
                         <div class="form-floating col-md-6">
-                            <input type="text" name="sub_category" class="form-control" id="sub_category" placeholder="Sub Category">
-                            <label for="sub_category">Sub Category</label>
+                            <select name="sub_category" class="form-select" id="sub_category" required>
+                                <option value="">Select Subcategory</option>
+                            </select>
+                            <label for="sub_category">Subcategory</label>
                         </div>
                     </div>
 
+                    <!-- Stock & Availability -->
                     <div class="row g-3 mb-3">
                         <div class="form-floating col-md-6">
                             <input type="number" name="stock" class="form-control" id="stock" value="0" placeholder="Stock">
@@ -58,19 +58,23 @@ $this->load->view('partials/header', $data);
                                 <option value="In Stock">In Stock</option>
                                 <option value="Out of Stock">Out of Stock</option>
                             </select>
+                            <label for="availability">Availability</label>
                         </div>
                     </div>
 
+                    <!-- Description -->
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea name="description" id="description" class="form-control"></textarea>
                     </div>
 
+                    <!-- Price -->
                     <div class="form-floating mb-3">
                         <input type="number" step="0.01" name="price" class="form-control" id="price" placeholder="Price" required>
                         <label for="price">Price (₹)</label>
                     </div>
 
+                    <!-- Image Upload / URL -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="image_input" class="form-label">Upload Image</label>
@@ -85,6 +89,7 @@ $this->load->view('partials/header', $data);
                         </div>
                     </div>
 
+                    <!-- Submit / Cancel -->
                     <div class="d-flex justify-content-center gap-2 mt-4">
                         <button type="submit" class="btn btn-success btn-lg shadow-sm">
                             <i class="bi bi-plus me-1"></i> Add Product
@@ -103,64 +108,109 @@ $this->load->view('partials/header', $data);
 
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#image_input').on('change', function() {
-            const [file] = this.files;
-            if (file) {
-                $('#image_preview').attr('src', URL.createObjectURL(file));
-                $('#image_url').val('');
-            }
-        });
-
-        $('#image_url').on('input', function() {
-            const url = $(this).val();
-            if (url) {
-                $('#image_preview').attr('src', url);
-                $('#image_input').val('');
-            }
-        });
-
-        $('#addProductForm').on('submit', function(e) {
-            e.preventDefault();
-
-            let formData = new FormData(this);
-
-            $.ajax({
-                url: $(this).attr('action'),
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                dataType: 'json',
-                beforeSend: function() {
-                    $('#msg').html('<div class="alert alert-info">Processing...</div>');
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
-                        $('#addProductForm')[0].reset();
-                        $('#image_preview').attr('src', '<?= base_url('assets/uploads/products/default.png'); ?>');
-                    } else {
-                        $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
-                    }
-                },
-                error: function(xhr) {
-                    let err = xhr.responseJSON?.message ?? 'Something went wrong!';
-                    $('#msg').html('<div class="alert alert-danger">' + err + '</div>');
-                }
-            });
-        });
-
-    });
-</script>
 
 <script>
+    var csrfName = '<?= $this->security->get_csrf_token_name(); ?>';
+    var csrfHash = '<?= $this->security->get_csrf_hash(); ?>';
+    let descriptionEditor;
+
+    // Initialize CKEditor
     ClassicEditor
         .create(document.querySelector('#description'))
-        .catch(error => {
-            console.error(error);
+        .then(editor => {
+            descriptionEditor = editor;
+        })
+        .catch(error => console.error(error));
+
+    // Category -> Subcategory AJAX
+    $('#category').on('change', function() {
+        var cat_id = $(this).val();
+        if (cat_id) {
+            var postData = {};
+            postData['cat_id'] = cat_id;
+            postData[csrfName] = csrfHash;
+
+            $.ajax({
+                url: "<?= site_url('products/get_subcategories_ajax') ?>",
+                method: "POST",
+                data: postData,
+                dataType: "json",
+                success: function(response) {
+                    csrfHash = response.csrfHash; // update CSRF hash
+                    $('#sub_category').html('<option value="">-- Select Subcategory --</option>');
+                    $.each(response.data, function(i, item) {
+                        $('#sub_category').append('<option value="' + item.sub_cat_id + '">' + item.sub_cat_name + '</option>');
+                    });
+                },
+                error: function(xhr) {
+                    console.error('AJAX error', xhr);
+                }
+            });
+        } else {
+            $('#sub_category').html('<option value="">-- Select Subcategory --</option>');
+        }
+    });
+
+    // Image preview
+    $('#image_input').on('change', function() {
+        const [file] = this.files;
+        if (file) {
+            $('#image_preview').attr('src', URL.createObjectURL(file));
+            $('#image_url').val('');
+        }
+    });
+
+    $('#image_url').on('input', function() {
+        const url = $(this).val();
+        if (url) {
+            $('#image_preview').attr('src', url);
+            $('#image_input').val('');
+        }
+    });
+
+    // Form submission
+    $('#addProductForm').on('submit', function(e) {
+        e.preventDefault();
+
+        // Update textarea with CKEditor content
+        if (descriptionEditor) {
+            $('#description').val(descriptionEditor.getData());
+        }
+
+        let formData = new FormData(this);
+        formData.set(csrfName, csrfHash);
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            beforeSend: function() {
+                $('#msg').html('<div class="alert alert-info">Processing...</div>');
+            },
+            success: function(response) {
+                csrfHash = '<?= $this->security->get_csrf_hash(); ?>'; // update CSRF hash
+
+                if (response.success) {
+                    $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
+                    $('#addProductForm')[0].reset();
+                    $('#image_preview').attr('src', '<?= base_url('assets/uploads/products/default.png'); ?>');
+
+                    // Reset CKEditor
+                    if (descriptionEditor) descriptionEditor.setData('');
+                } else {
+                    $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+            },
+            error: function(xhr) {
+                let err = xhr.responseJSON?.message ?? 'Something went wrong!';
+                $('#msg').html('<div class="alert alert-danger">' + err + '</div>');
+            }
         });
+    });
 </script>

@@ -25,54 +25,56 @@ $this->load->view('partials/header', $data);
 
                         <div class="row">
 
+                            <!-- Product Name -->
                             <div class="col-md-6 mb-3">
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control"
-                                    value="<?= $product->name; ?>" required>
+                                    value="<?= htmlspecialchars($product->name); ?>" required>
                             </div>
 
+                            <!-- Category -->
                             <div class="col-md-6 mb-3">
                                 <label>Category</label>
-
-                                <div class="dropdown">
-                                    <button class="form-control text-start dropdown-toggle" type="button"
-                                        id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <?= $product->category ? htmlspecialchars($product->category) : 'Select Category' ?>
-                                    </button>
-
-                                    <ul class="dropdown-menu w-100" aria-labelledby="categoryDropdown" style="z-index: 2000;">
-                                        <?php foreach ($categories as $cat): ?>
-                                            <li>
-                                                <a class="dropdown-item <?= ($product->category === $cat ? 'active bg-primary text-white' : '') ?>"
-                                                    href="#"
-                                                    onclick="event.preventDefault(); document.getElementById('categoryInput').value='<?= htmlspecialchars($cat) ?>'; document.getElementById('categoryDropdown').innerText='<?= htmlspecialchars($cat) ?>';">
-                                                    <?= htmlspecialchars($cat) ?>
-                                                </a>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                </div>
-
-                                <input type="hidden" name="category" id="categoryInput" value="<?= htmlspecialchars($product->category) ?>">
+                                <select name="category" id="category" class="form-control">
+                                    <option value="">Select Category</option>
+                                    <?php foreach ($categories as $cat): ?>
+                                        <option value="<?= $cat['cat_id'] ?>"
+                                            <?= ($product->category == $cat['cat_id'] ? 'selected' : '') ?>>
+                                            <?= htmlspecialchars($cat['cat_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
 
+                            <!-- Subcategory -->
                             <div class="col-md-6 mb-3">
                                 <label>Sub Category</label>
-                                <input type="text" name="sub_category" class="form-control"
-                                    value="<?= $product->sub_category; ?>">
+                                <select name="sub_category" id="sub_category" class="form-control">
+                                    <option value="">Select Subcategory</option>
+                                    <?php foreach ($subcategories as $sub): ?>
+                                        <option value="<?= $sub['sub_cat_id'] ?>"
+                                            <?= ($product->sub_category == $sub['sub_cat_id'] ? 'selected' : '') ?>>
+                                            <?= htmlspecialchars($sub['sub_cat_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
 
+                            <!-- Stock -->
                             <div class="col-md-6 mb-3">
                                 <label>Stock</label>
                                 <input type="number" name="stock" class="form-control"
                                     value="<?= $product->stock; ?>">
                             </div>
 
+                            <!-- Description -->
                             <div class="col-md-12 mb-3">
                                 <label>Description</label>
-                                <textarea name="description" class="form-control"><?= $product->description; ?></textarea>
+                                <textarea name="description" id="description"
+                                    class="form-control"><?= htmlspecialchars($product->description); ?></textarea>
                             </div>
 
+                            <!-- Availability -->
                             <div class="col-md-6 mb-3">
                                 <label>Availability</label>
                                 <select name="availability" class="form-control">
@@ -85,12 +87,14 @@ $this->load->view('partials/header', $data);
                                 </select>
                             </div>
 
+                            <!-- Price -->
                             <div class="col-md-6 mb-3">
                                 <label>Price</label>
                                 <input type="number" step="0.01" name="price" class="form-control"
                                     value="<?= $product->price; ?>" required>
                             </div>
 
+                            <!-- Image Upload / URL -->
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="image_input" class="form-label">Upload Image</label>
@@ -104,7 +108,8 @@ $this->load->view('partials/header', $data);
 
                                 <div class="col-md-6">
                                     <label for="image_url" class="form-label">Or enter Image URL</label>
-                                    <input type="url" name="image_url" id="image_url" class="form-control" placeholder="https://example.com/image.jpg">
+                                    <input type="url" name="image_url" id="image_url" class="form-control"
+                                        placeholder="https://example.com/image.jpg">
                                 </div>
                             </div>
 
@@ -115,7 +120,7 @@ $this->load->view('partials/header', $data);
                         </button>
 
                         <a href="<?= site_url('products'); ?>" class="btn btn-secondary ms-2">
-                            <i class="bi bi-x-lg me-1"></i>Cancel
+                            <i class="bi bi-x-lg me-1"></i> Cancel
                         </a>
 
                         <?= form_close(); ?>
@@ -133,37 +138,49 @@ $this->load->view('partials/header', $data);
 
 <?php $this->load->view('partials/footer'); ?>
 
+<!-- CKEditor -->
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
 <script>
     $(document).ready(function() {
+        var csrfName = '<?= $this->security->get_csrf_token_name(); ?>';
+        var csrfHash = '<?= $this->security->get_csrf_hash(); ?>';
 
-        $('#editProductForm').on('submit', function(e) {
-            e.preventDefault();
+        // CKEditor
+        ClassicEditor.create(document.querySelector('#description'))
+            .then(editor => {
+                window.descriptionEditor = editor;
+            })
+            .catch(error => console.error(error));
 
-            var formData = new FormData(this);
-            var msgContainer = $('#formMessage');
-            msgContainer.html('');
+        // Category -> Subcategory AJAX
+        $('#category').on('change', function() {
+            var cat_id = $(this).val();
+            if (!cat_id) {
+                $('#sub_category').html('<option value="">Select Subcategory</option>');
+                return;
+            }
+
+            var postData = {};
+            postData['cat_id'] = cat_id;
+            postData[csrfName] = csrfHash;
 
             $.ajax({
-                url: $(this).attr('action'),
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                contentType: false,
-                processData: false,
-                success: function(data) {
-                    if (data.success) {
-                        msgContainer.html('<div class="alert alert-success">' + data.message + '</div>');
-                    } else {
-                        msgContainer.html('<div class="alert alert-danger">' + data.message + '</div>');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr, status, error);
-                    msgContainer.html('<div class="alert alert-danger">Something went wrong! Please try again.</div>');
+                url: "<?= site_url('products/get_subcategories_ajax') ?>",
+                method: "POST",
+                data: postData,
+                dataType: "json",
+                success: function(response) {
+                    csrfHash = response.csrfHash;
+                    $('#sub_category').html('<option value="">Select Subcategory</option>');
+                    $.each(response.data, function(i, item) {
+                        $('#sub_category').append('<option value="' + item.sub_cat_id + '">' + item.sub_cat_name + '</option>');
+                    });
                 }
             });
         });
 
+        // Image preview
         $('#image_input').on('change', function() {
             const [file] = this.files;
             if (file) {
@@ -180,5 +197,32 @@ $this->load->view('partials/header', $data);
             }
         });
 
+        // Form submission
+        $('#editProductForm').on('submit', function(e) {
+            e.preventDefault();
+            if (window.descriptionEditor) $('#description').val(window.descriptionEditor.getData());
+
+            var formData = new FormData(this);
+            formData.set(csrfName, csrfHash);
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#formMessage').html('<div class="alert alert-success">' + response.message + '</div>');
+                    } else {
+                        $('#formMessage').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                },
+                error: function(xhr) {
+                    $('#formMessage').html('<div class="alert alert-danger">Something went wrong! Please try again.</div>');
+                }
+            });
+        });
     });
 </script>

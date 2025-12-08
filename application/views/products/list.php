@@ -48,10 +48,16 @@ $this->load->view('partials/header', $data);
                     </div>
 
                     <?php if ($logged_user->role === 'admin'): ?>
-                        <a href="<?= site_url('products/add'); ?>" class="btn btn-primary">
-                            <i class="bi bi-plus"></i>
-                            Add Product
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="<?= site_url('products/category'); ?>" class="btn btn-success">
+                                <i class="bi bi-plus"></i>
+                                Add Category
+                            </a>
+                            <a href="<?= site_url('products/add'); ?>" class="btn btn-primary">
+                                <i class="bi bi-plus"></i>
+                                Add Product
+                            </a>
+                        </div>
                     <?php endif; ?>
                 </div>
 

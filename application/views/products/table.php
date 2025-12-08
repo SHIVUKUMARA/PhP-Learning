@@ -85,7 +85,7 @@ $this->load->view('partials/header', $data);
                                                     <img src="<?= $img_src ?>" class="card-img-top" style="height:100px; object-fit:cover;">
                                                 </td>
                                                 <td><?= htmlspecialchars($p->name); ?></td>
-                                                <td><?= htmlspecialchars($p->category); ?></td>
+                                                <td><?= htmlspecialchars($p->category ?? 'NA'); ?></td>
                                                 <td><?= htmlspecialchars($p->sub_category ?? 'NA'); ?></td>
                                                 <td><?= htmlspecialchars($p->stock); ?></td>
                                                 <td><?= htmlspecialchars($p->price); ?></td>

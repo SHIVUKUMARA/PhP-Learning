@@ -80,3 +80,5 @@ $route['products/add'] = 'products/add';
 $route['products/edit/(:num)'] = 'products/edit/$1';
 $route['products/delete/(:num)'] = 'products/delete/$1';
 $route['products/table'] = 'products/table';
+$route['products/category'] = 'products/category';
+$route['products/subcategory'] = 'products/subcategory';
