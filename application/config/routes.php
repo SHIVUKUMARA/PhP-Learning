@@ -82,3 +82,20 @@ $route['products/delete/(:num)'] = 'products/delete/$1';
 $route['products/table'] = 'products/table';
 $route['products/category'] = 'products/category';
 $route['products/subcategory'] = 'products/subcategory';
+
+
+$route['omni'] = 'Omni_products/index';
+$route['omni/create'] = 'Omni_products/create';
+$route['omni/store'] = 'Omni_products/store';
+$route['omni/get_product/(:num)'] = 'Omni_products/get_product/$1';
+$route['omni/edit/(:num)'] = 'Omni_products/edit/$1';
+$route['omni/update/(:num)'] = 'Omni_products/update/$1';
+$route['omni/delete/(:num)'] = 'Omni_products/delete/$1';
+
+
+$route['omni/publish-view']        = 'Omni_publish/index';
+$route['omni/publish/store']  = 'Omni_publish/publish';
+$route['omni/published'] = 'Omni_publish/published_view';
+$route['omni/published/api'] = 'Omni_publish/get_published_products';
+$route['omni/published/api/delete/(:any)'] = 'Omni_publish/delete_published/$1';
+$route['omni/published/api/update/(:any)'] = 'Omni_publish/update_published/$1';

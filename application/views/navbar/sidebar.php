@@ -76,6 +76,50 @@ $segment4 = $this->uri->segment(4);
                         <p>Languages</p>
                     </a>
                 </li>
+                <?php
+                $segment1 = $this->uri->segment(1);
+                $segment2 = $this->uri->segment(2);
+
+                $isOmniMenu =
+                    ($segment1 === 'omni_products')
+                    || ($segment1 === 'omni' && in_array($segment2, ['publish-view', 'published'], true));
+                ?>
+
+                <li class="nav-item <?= $isOmniMenu ? 'menu-open' : '' ?>">
+                    <a href="#" class="nav-link <?= $isOmniMenu ? 'active' : '' ?>">
+                        <i class="nav-icon bi bi-diagram-3"></i>
+                        <p>
+                            Omni Channel
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
+                    </a>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="<?= base_url('omni_products') ?>"
+                                class="nav-link <?= ($segment1 === 'omni_products') ? 'active' : '' ?>">
+                                <i class="nav-icon bi bi-box-seam"></i>
+                                <p>Products</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="<?= base_url('omni/publish-view') ?>"
+                                class="nav-link <?= ($segment1 === 'omni' && $segment2 === 'publish-view') ? 'active' : '' ?>">
+                                <i class="nav-icon bi bi-upload"></i>
+                                <p>Publish (Omni)</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="<?= base_url('omni/published') ?>"
+                                class="nav-link <?= ($segment1 === 'omni' && $segment2 === 'published') ? 'active' : '' ?>">
+                                <i class="nav-icon bi bi-check-circle"></i>
+                                <p>Published Products</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
                 <li class="nav-item">
                     <a href="../docs/faq.html" class="nav-link">
