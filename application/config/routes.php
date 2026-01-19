@@ -99,3 +99,6 @@ $route['omni/published'] = 'Omni_publish/published_view';
 $route['omni/published/api'] = 'Omni_publish/get_published_products';
 $route['omni/published/api/delete/(:any)'] = 'Omni_publish/delete_published/$1';
 $route['omni/published/api/update/(:any)'] = 'Omni_publish/update_published/$1';
+
+
+$route['facebook-feed.xml'] = 'facebook_feed/index';

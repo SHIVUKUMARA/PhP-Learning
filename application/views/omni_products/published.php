@@ -21,7 +21,7 @@ $this->load->view('partials/header', $data);
                     <select id="platformSelect" class="form-select w-auto">
                         <option value="">Select Platform</option>
                         <option value="Supabase">Supabase</option>
-                        <option value="Beeceptor">Beeceptor</option>
+                        <option value="Facebook">Facebook</option>
                         <option value="CrudCrud">CrudCrud</option>
                         <option value="Mock API">Mock API</option>
                     </select>
@@ -303,44 +303,7 @@ $this->load->view('partials/header', $data);
             document.getElementById('editProductModal')
         ).show();
     });
-    // update published product
-    // document.getElementById('saveEdit').addEventListener('click', function() {
-    //     if (!currentEditProduct) return;
 
-    //     const platform = document.getElementById('platformSelect').value;
-    //     const id = document.getElementById('edit_doc_id').value;
-
-    //     const updated = {
-    //         ...currentEditProduct,
-    //         product_name: document.getElementById('edit_product_name').value,
-    //         sku: document.getElementById('edit_sku').value,
-    //         price: Number(document.getElementById('edit_price').value),
-    //         sale_price: Number(document.getElementById('edit_sale_price').value),
-    //         stock: Number(document.getElementById('edit_stock').value),
-    //         brand: document.getElementById('edit_brand').value,
-    //         category_name: document.getElementById('edit_category').value,
-    //         description: document.getElementById('edit_description').value,
-    //         main_image_url: document.getElementById('edit_image').value
-    //     };
-
-    //     fetch(`<?= site_url('omni/published/api/update') ?>/${id}?platform=${platform}`, {
-    //             method: 'PUT',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify(updated)
-    //         })
-    //         .then(res => res.json())
-    //         .then(resp => {
-    //             if (!resp.ok) throw resp;
-    //             alert('Product updated successfully');
-    //             location.reload();
-    //         })
-    //         .catch(err => {
-    //             console.error(err);
-    //             alert('Update failed');
-    //         });
-    // });
     document.getElementById('saveEdit').addEventListener('click', function() {
         if (!currentEditProduct) return;
 
@@ -374,7 +337,10 @@ $this->load->view('partials/header', $data);
             })
             .then(res => res.json())
             .then(resp => {
-                if (!resp.ok) throw resp;
+                if (!resp || resp.ok !== true) {
+                    throw new Error(resp?.message || 'Update failed');
+                }
+
                 alert('Product updated successfully');
                 location.reload();
             })
@@ -425,12 +391,13 @@ $this->load->view('partials/header', $data);
             })
             .then(res => res.json())
             .then(resp => {
-                if (resp.ok) {
-                    delBtn.closest('tr').remove();
-                    alert(`Deleted from ${platform}`);
-                } else {
-                    alert(resp.message || 'Delete failed');
+                if (!resp || resp.ok !== true) {
+                    alert(resp?.message || 'Delete failed');
+                    return;
                 }
+
+                delBtn.closest('tr').remove();
+                alert(`Deleted from ${platform}`);
             })
             .catch(() => alert('Server error'));
     });

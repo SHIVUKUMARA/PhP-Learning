@@ -79,54 +79,151 @@ class Omni_products extends CI_Controller
 
         $this->load->view('omni_products/omni_add', $data);
     }
+    // Update Product
+    // public function update($id)
+    // {
+    //     if (!$this->omni->get_by_id($id)) {
+    //         return $this->_json(false, 'Product not found', [
+    //             'csrf' => [
+    //                 'name' => $this->security->get_csrf_token_name(),
+    //                 'hash' => $this->security->get_csrf_hash()
+    //             ]
+    //         ]);
+    //     }
 
+    //     $this->_rules(false);
+
+    //     if ($this->form_validation->run() === FALSE) {
+    //         return $this->_json(false, validation_errors(), [
+    //             'csrf' => [
+    //                 'name' => $this->security->get_csrf_token_name(),
+    //                 'hash' => $this->security->get_csrf_hash()
+    //             ]
+    //         ]);
+    //     }
+
+    //     $this->omni->update($id, $this->_payload());
+
+    //     return $this->_json(true, 'Product updated', [
+    //         'csrf' => [
+    //             'name' => $this->security->get_csrf_token_name(),
+    //             'hash' => $this->security->get_csrf_hash()
+    //         ]
+    //     ]);
+    // }
     public function update($id)
     {
-        if (!$this->omni->get_by_id($id)) {
-            return $this->_json(false, 'Product not found', [
-                'csrf' => [
-                    'name' => $this->security->get_csrf_token_name(),
-                    'hash' => $this->security->get_csrf_hash()
-                ]
-            ]);
-        }
-
-        $this->_rules(false);
-
-        if ($this->form_validation->run() === FALSE) {
-            return $this->_json(false, validation_errors(), [
-                'csrf' => [
-                    'name' => $this->security->get_csrf_token_name(),
-                    'hash' => $this->security->get_csrf_hash()
-                ]
-            ]);
-        }
-
-        $this->omni->update($id, $this->_payload());
-
-        return $this->_json(true, 'Product updated', [
-            'csrf' => [
-                'name' => $this->security->get_csrf_token_name(),
-                'hash' => $this->security->get_csrf_hash()
-            ]
-        ]);
-    }
-    /* ======================
-       DELETE
-    ====================== */
-    public function delete($id)
-    {
-        if (!$this->omni->get_by_id($id)) {
+        $product = $this->omni->get_by_id($id);
+        if (!$product) {
             return $this->_json(false, 'Product not found');
         }
 
-        $this->omni->delete($id);
-        return $this->_json(true, 'Product deleted');
+        $this->_rules(false);
+        if ($this->form_validation->run() === FALSE) {
+            return $this->_json(false, validation_errors());
+        }
+
+        // Prepare payload
+        $data = $this->_payload();
+        $this->omni->update($id, $data);
+
+        // Sync to all published platforms
+        $syncResults = $this->_sync_to_platforms($id, $data);
+
+        return $this->_json(true, 'Product updated and synced', [
+            'sync' => $syncResults
+        ]);
     }
 
-    /* ======================
-       SEARCH (AJAX)
-    ====================== */
+    private function _sync_to_platforms($productId, $payload)
+    {
+        $product = $this->omni->get_by_id($productId);
+        if (!$product) return [];
+
+        $platformIds = json_decode($product->published_ids, true) ?: [];
+        if (empty($platformIds)) return [];
+
+        $urls = [
+            'CrudCrud' => 'https://crudcrud.com/api/2350da2f06394fc792347ab832c93d08/products',
+            'Mock API' => 'https://6968d5a969178471522bae41.mockapi.io/api/products',
+            'Beeceptor' => 'https://ca88fe7b23e3b6cf0603.free.beeceptor.com/api/products',
+            'Supabase' => 'https://ryeevubdyhdhbxbhpadd.supabase.co/rest/v1/products'
+        ];
+
+        $supabaseKey = 'sb_publishable_sTNam675QMlDgMmmhTnOyQ_Q_-CfbA2';
+        $results = [];
+
+        foreach ($platformIds as $platform => $externalId) {
+
+            if (!isset($urls[$platform])) continue;
+
+            $headers = ['Content-Type: application/json'];
+
+            if ($platform === 'Supabase') {
+                $url = $urls[$platform] . "?id=eq.{$externalId}";
+                $headers = [
+                    'Content-Type: application/json',
+                    'apikey: ' . $supabaseKey,
+                    'Authorization: Bearer ' . $supabaseKey
+                ];
+            } else {
+                $url = $urls[$platform] . "/{$externalId}";
+            }
+
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_CUSTOMREQUEST  => 'PATCH',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER     => $headers,
+                CURLOPT_POSTFIELDS     => json_encode($payload),
+                CURLOPT_TIMEOUT        => 30
+            ]);
+
+            $response = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            $results[$platform] = [
+                'success' => !$error && in_array($code, [200, 204]),
+                'httpCode' => $code,
+                'error' => $error
+            ];
+        }
+
+        return $results;
+    }
+
+
+    // Delete Product
+    // public function delete($id)
+    // {
+    //     if (!$this->omni->get_by_id($id)) {
+    //         return $this->_json(false, 'Product not found');
+    //     }
+
+    //     $this->omni->delete($id);
+    //     return $this->_json(true, 'Product deleted');
+    // }
+    public function delete($id)
+    {
+        $product = $this->omni->get_by_id($id);
+        if (!$product) {
+            return $this->_json(false, 'Product not found');
+        }
+
+        // Delete from all published platforms first
+        $syncResults = $this->_sync_to_platforms($id, [], 'DELETE');
+
+        // Then delete locally
+        $this->omni->delete($id);
+
+        return $this->_json(true, 'Product deleted from all platforms', [
+            'sync' => $syncResults
+        ]);
+    }
+
+    // Search Products
     public function search()
     {
         $q = trim($this->input->get('q'));
@@ -135,9 +232,7 @@ class Omni_products extends CI_Controller
         return $this->_json(true, 'OK', $this->omni->search($q));
     }
 
-    /* ======================
-       VALIDATION
-    ====================== */
+    // Validation rules
     private function _rules($create = true)
     {
         $this->form_validation->set_rules('product_name', 'Product Name', 'required');

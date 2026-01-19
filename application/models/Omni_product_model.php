@@ -30,6 +30,50 @@ class Omni_product_model extends CI_Model
         return $this->db->delete($this->table, ['id' => $id]);
     }
 
+    public function get_facebook_products()
+    {
+        return $this->db
+            ->where('facebook_publish', 1)
+            ->order_by('id', 'DESC')
+            ->get($this->table)
+            ->result();
+    }
+
+    public function get_facebook_published_products()
+    {
+        $this->db->select('
+        id AS product_id,
+        sku,
+        product_name,
+        category_name,
+        description,
+        price,
+        sale_price,
+        stock,
+        currency,
+        brand,
+        gtin,
+        mpn,
+        main_image_url,
+        extra_image_urls,
+        facebook_publish,
+        published_on,
+        updated_at
+        ');
+        $this->db->from('omni_products');
+        $this->db->where('facebook_publish', 1);
+        $this->db->order_by('published_on', 'DESC');
+
+        $query = $this->db->get();
+
+        if (!$query) {
+            log_message('error', 'Facebook products DB error: ' . $this->db->last_query());
+            return false;
+        }
+
+        return $query->result_array();
+    }
+
     public function search($keyword)
     {
         return $this->db

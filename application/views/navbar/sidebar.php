@@ -25,10 +25,10 @@ $segment4 = $this->uri->segment(4);
                     </a>
                 </li>
 
-                <li class="nav-item <?=
-                                    ($segment1 == 'dashboard' && ($segment2 == 'table' || $segment2 == 'api_table'))
-                                        || ($segment1 == 'products' && $segment2 == 'table') ? 'menu-open' : ''
-                                    ?>">
+                <!-- <li class="nav-item <?=
+                                            ($segment1 == 'dashboard' && ($segment2 == 'table' || $segment2 == 'api_table'))
+                                                || ($segment1 == 'products' && $segment2 == 'table') ? 'menu-open' : ''
+                                            ?>">
                     <a href="#" class="nav-link <?=
                                                 ($segment1 == 'dashboard' && ($segment2 == 'table' || $segment2 == 'api_table'))
                                                     || ($segment1 == 'products' && $segment2 == 'table') ? 'active' : ''
@@ -75,7 +75,8 @@ $segment4 = $this->uri->segment(4);
                         <i class="nav-icon bi bi-translate"></i>
                         <p>Languages</p>
                     </a>
-                </li>
+                </li> -->
+
                 <?php
                 $segment1 = $this->uri->segment(1);
                 $segment2 = $this->uri->segment(2);

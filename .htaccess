@@ -2,6 +2,9 @@
     RewriteEngine On
     RewriteBase /firstci3/
 
+    # Force XML feeds through CodeIgniter
+    RewriteRule ^facebook-feed\.xml$ index.php/facebook_feed/index [L,QSA]
+
     # Redirect all requests to index.php if the file/folder doesn't exist
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
