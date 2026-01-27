@@ -33,7 +33,7 @@ class Omni_product_model extends CI_Model
     public function get_facebook_products()
     {
         return $this->db
-            ->where('facebook_publish', 1)
+            ->where('facebook_status', 1)
             ->order_by('id', 'DESC')
             ->get($this->table)
             ->result();
@@ -56,12 +56,12 @@ class Omni_product_model extends CI_Model
         mpn,
         main_image_url,
         extra_image_urls,
-        facebook_publish,
+        facebook_status
         published_on,
         updated_at
         ');
         $this->db->from('omni_products');
-        $this->db->where('facebook_publish', 1);
+        $this->db->where('facebook_status', 1);
         $this->db->order_by('published_on', 'DESC');
 
         $query = $this->db->get();

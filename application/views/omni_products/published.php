@@ -249,7 +249,7 @@ $this->load->view('partials/header', $data);
                     <td>${Number(p.price).toFixed(2)} ${p.currency}</td>
                     <td>${p.stock}</td>
                     <td><span class="badge bg-success">PUBLISHED</span></td>
-                    <td>${p.published_at ?? '-'}</td>
+                    <td>${p.published_on ?? '-'}</td>
                     <td>
                         <button class="btn btn-sm btn-primary viewPublished"
                             data-product='${JSON.stringify(p)}'>

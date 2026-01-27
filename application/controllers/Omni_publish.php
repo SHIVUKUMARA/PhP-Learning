@@ -25,7 +25,6 @@ class Omni_publish extends CI_Controller
         $this->load->vars(['logged_user' => $logged_user]);
     }
 
-
     public function index()
     {
         $data['title'] = 'Publish Omni Products | AdminLTE';
@@ -48,9 +47,9 @@ class Omni_publish extends CI_Controller
             return $this->_json(false, 'Invalid product');
         }
 
-        if (in_array('Facebook', $social, true) && (int)$product->facebook_publish === 1) {
-            return $this->_json(false, 'Product is already published to Facebook');
-        }
+        // if (in_array('Facebook', $social, true) && (int)$product->facebook_status === 1) {
+        //     return $this->_json(false, 'Product is already published to Facebook');
+        // }
 
         if (empty($social)) {
             return $this->_json(false, 'Select at least one platform');
@@ -98,13 +97,25 @@ class Omni_publish extends CI_Controller
 
         foreach ($social as $platform) {
 
-            // Facebook is feed-based, not API-based
+            // Facebook - XML FEED
             if ($platform === 'Facebook') {
-                $responses['Facebook'] = [
-                    'success' => true,
-                    'mode'    => 'feed',
-                    'message' => 'Product will be included in Facebook catalog feed'
-                ];
+
+                if ((int)$product->facebook_status === 1) {
+                    // Already in feed — do NOT block
+                    $responses['Facebook'] = [
+                        'success' => true,
+                        'mode'    => 'feed',
+                        'message' => 'Product is already included in feed'
+                    ];
+                } else {
+                    // Newly added to feed
+                    $responses['Facebook'] = [
+                        'success' => true,
+                        'mode'    => 'feed',
+                        'message' => 'Product added to Facebook catalog feed'
+                    ];
+                }
+
                 continue;
             }
 
@@ -173,7 +184,7 @@ class Omni_publish extends CI_Controller
         //         'published_ids' => json_encode($publishedIds)
         //     ]);
         // }
-        // Save platform IDs (CRITICAL)
+
         $updateData = [];
 
         if (!empty($publishedIds)) {
@@ -182,7 +193,7 @@ class Omni_publish extends CI_Controller
 
         // If Facebook selected → enable feed publishing
         if (in_array('Facebook', $social, true)) {
-            $updateData['facebook_publish'] = 1;
+            $updateData['facebook_status'] = 1;
         }
 
         if (!empty($updateData)) {
@@ -204,18 +215,18 @@ class Omni_publish extends CI_Controller
         }
 
         $this->omni->update($productId, [
-            'facebook_publish' => 0
+            'facebook_status' => 0
         ]);
 
         return $this->_json(true, 'Product removed from Facebook feed');
     }
 
-    // Get All published products for a platform
+    // Get All published products for the platform
     public function get_published_products()
     {
         $platform = $this->input->get('platform');
 
-        // FACEBOOK = LOCAL DATABASE
+        // facebook = local db
         if ($platform === 'Facebook') {
 
             $products = $this->omni->get_facebook_published_products();

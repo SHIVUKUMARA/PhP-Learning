@@ -83,7 +83,7 @@ $route['products/table'] = 'products/table';
 $route['products/category'] = 'products/category';
 $route['products/subcategory'] = 'products/subcategory';
 
-
+// Omni Products upload using .xml file
 $route['omni'] = 'Omni_products/index';
 $route['omni/create'] = 'Omni_products/create';
 $route['omni/store'] = 'Omni_products/store';
@@ -100,5 +100,8 @@ $route['omni/published/api'] = 'Omni_publish/get_published_products';
 $route['omni/published/api/delete/(:any)'] = 'Omni_publish/delete_published/$1';
 $route['omni/published/api/update/(:any)'] = 'Omni_publish/update_published/$1';
 
-
 $route['facebook-feed.xml'] = 'facebook_feed/index';
+
+
+// Omni Product Upload using Graph API
+$route['multi-platform'] = 'Multi_platform/index';
